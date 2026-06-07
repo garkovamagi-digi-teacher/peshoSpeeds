@@ -299,15 +299,23 @@ body::before {
 .pct-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
 .pct-cell { border-radius: 11px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06); }
 .pct-top {
-  padding: 7px 4px 5px; text-align: center;
+  padding: 6px 4px 4px; text-align: center;
   font-size: 12px; font-weight: 700; font-style: italic;
   color: #fff; letter-spacing: .03em;
 }
 .pct-val {
-  padding: 8px 4px 9px; text-align: center;
+  padding: 6px 4px 2px; text-align: center;
   font-family: Cambria, Georgia, serif;
-  font-size: 17px; font-weight: 700; color: #fff;
-  background: rgba(0,0,0,0.18); letter-spacing: .02em;
+  font-size: 16px; font-weight: 700; color: #fff;
+  letter-spacing: .02em;
+}
+.pct-val2 {
+  padding: 2px 4px 7px; text-align: center;
+  font-family: Cambria, Georgia, serif;
+  font-size: 13px; font-weight: 400; font-style: italic;
+  color: rgba(255,255,255,0.78);
+  background: rgba(0,0,0,0.18);
+  letter-spacing: .01em;
 }
 
 /* ── ALL TABLE ── */
@@ -334,9 +342,10 @@ body::before {
 .all-table tbody tr:last-child { border-bottom: none; }
 .all-table tbody tr:hover { background: var(--sky); }
 .all-table td {
-  padding: 10px 6px; text-align: center;
+  padding: 8px 4px; text-align: center;
   font-family: Cambria, Georgia, serif;
   font-size: 13px; font-weight: 700; color: var(--navy);
+  line-height: 1.4;
 }
 .all-table td:first-child {
   text-align: left; padding-left: 14px;
@@ -416,8 +425,14 @@ body::before {
 .hist-pct-v {
   font-family: Cambria, Georgia, serif;
   font-size: 10px; font-weight: 700;
-  padding: 3px 2px 6px; color: rgba(255,255,255,0.85);
-  background: rgba(0,0,0,0.15);
+  padding: 3px 2px 1px; color: rgba(255,255,255,0.85);
+  background: rgba(0,0,0,0.12);
+}
+.hist-pct-v2 {
+  font-family: Cambria, Georgia, serif;
+  font-size: 9px; font-weight: 400; font-style: italic;
+  padding: 1px 2px 5px; color: rgba(255,255,255,0.65);
+  background: rgba(0,0,0,0.22);
 }
 .chart-wrap {
   padding: 12px 14px 6px; border-bottom: 1px solid var(--border);
@@ -818,7 +833,8 @@ function calcAndSave(){
   document.getElementById('res-grid').innerHTML=PCTS.map(p=>`
     <div class="pct-cell">
       <div class="pct-top" style="background:${PCOL[p]}">${Math.round(p*100)}%</div>
-      <div class="pct-val" style="background:${PCOL[p]}">${fmt(Math.round(adj/p))}</div>
+      <div class="pct-val" style="background:${PCOL[p]}">${fmt(Math.round(adj*(2-p)))}</div>
+      <div class="pct-val2" style="background:${PCOL[p]}">${fmt(Math.round(adj/p))}</div>
     </div>`).join('');
   document.getElementById('enter-results').style.display='block';
   document.getElementById('enter-results').scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -851,7 +867,7 @@ async function loadAll(){
     kids.forEach(row=>{
       const adj=row.time_hundredths;
       html+=`<tr><td>${row.child_name}</td>`;
-      PCTS.forEach(p=>{html+=`<td>${fmt(Math.round(adj/p))}</td>`;});
+      PCTS.forEach(p=>{html+=`<td><span style='display:block;font-weight:700'>${fmt(Math.round(adj*(2-p)))}</span><span style='display:block;font-size:11px;font-style:italic;color:var(--text3)'>${fmt(Math.round(adj/p))}</span></td>`;});
       html+='</tr>';
     });
     html+='</tbody></table></div></div>';
@@ -946,7 +962,8 @@ function renderCH(){
         <div class="hist-pct-row">
           ${PCTS.map(p=>`<div class="hist-pct-cell" style="background:${PCOL[p]}">
             <div class="hist-pct-lbl">${Math.round(p*100)}%</div>
-            <div class="hist-pct-v">${fmt(Math.round(adj/p))}</div>
+            <div class="hist-pct-v">${fmt(Math.round(adj*(2-p)))}</div>
+            <div class="hist-pct-v2">${fmt(Math.round(adj/p))}</div>
           </div>`).join('')}
         </div>`;
       block.appendChild(entry);
@@ -1023,7 +1040,8 @@ function renderDelRecords(){
       <div class="hist-pct-row">
         ${PCTS.map(p=>`<div class="hist-pct-cell" style="background:${PCOL[p]}">
           <div class="hist-pct-lbl">${Math.round(p*100)}%</div>
-          <div class="hist-pct-v">${fmt(Math.round(r.time_hundredths/p))}</div>
+          <div class="hist-pct-v">${fmt(Math.round(r.time_hundredths*(2-p)))}</div>
+          <div class="hist-pct-v2">${fmt(Math.round(r.time_hundredths/p))}</div>
         </div>`).join('')}
       </div>`;
     el.appendChild(entry);
