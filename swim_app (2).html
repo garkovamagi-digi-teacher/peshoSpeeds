@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AQUA · Серии</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --beige:    #f5f0e8;
+  --beige2:   #ede7d9;
+  --beige3:   #e2d9c8;
+  --cream:    #faf7f2;
+  --navy:     #0d2b52;
+  --navy2:    #1a3f72;
+  --navy3:    #254e8c;
+  --blue:     #2e6ab4;
+  --blue2:    #4886cc;
+  --sky:      #d6e8f7;
+  --sky2:     #b8d4ee;
+  --gold:     #8b6914;
+  --gold2:    #c49a2a;
+  --text:     #1a1208;
+  --text2:    #4a3c28;
+  --text3:    #8a7860;
+  --border:   rgba(13,43,82,0.12);
+  --border2:  rgba(13,43,82,0.22);
+  --shadow:   0 2px 16px rgba(13,43,82,0.10);
+  --shadow2:  0 6px 32px rgba(13,43,82,0.15);
+  --r:        14px;
+  --menu-w:   75vw;
+
+  --c97: #9b0000; --c95: #bf2200;
+  --c92: #d44000; --c90: #c86000;
+  --c89: #c08000; --c88: #a89200;
+  --c86: #809800; --c80: #3a9400;
+  --c75: #007a40;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--cream); color: var(--text); font-family: Cambria, 'Libre Baskerville', Georgia, serif; overflow-x: hidden; }
+
+/* subtle paper texture via gradient */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 0% 0%, rgba(46,106,180,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 100% 100%, rgba(13,43,82,0.06) 0%, transparent 55%);
+}
+
+/* ── OVERLAY ── */
+#overlay {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(13,43,82,0.35);
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+  backdrop-filter: blur(3px);
+}
+#overlay.open { opacity: 1; pointer-events: all; }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: var(--menu-w); max-width: 300px;
+  background: var(--navy);
+  z-index: 100;
+  transform: translateX(-100%);
+  transition: transform .33s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+#sidebar.open { transform: translateX(0); }
+
+.sb-hero {
+  padding: 54px 26px 28px;
+  background: linear-gradient(160deg, var(--navy2) 0%, var(--navy) 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  position: relative; overflow: hidden;
+  flex-shrink: 0;
+}
+.sb-hero::before {
+  content: '';
+  position: absolute; top: -50px; right: -50px;
+  width: 180px; height: 180px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(196,154,42,0.18) 0%, transparent 65%);
+}
+.sb-hero::after {
+  content: '';
+  position: absolute; bottom: 0; left: 20%; right: 20%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(196,154,42,0.5), transparent);
+}
+.sb-monogram {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  background: rgba(196,154,42,0.15);
+  border: 1px solid rgba(196,154,42,0.35);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.sb-monogram i { font-size: 22px; color: var(--gold2); }
+.sb-title {
+  font-size: 22px; font-weight: 700;
+  color: #fff; letter-spacing: .04em; line-height: 1.1;
+}
+.sb-title em { color: var(--gold2); font-style: italic; }
+.sb-sub {
+  font-size: 12px; font-style: italic;
+  color: rgba(255,255,255,0.45); margin-top: 5px;
+  letter-spacing: .03em;
+}
+
+.sb-nav { flex: 1; padding: 18px 12px; overflow-y: auto; }
+
+.sb-lbl {
+  font-size: 9px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: rgba(255,255,255,0.3);
+  padding: 0 10px; margin: 6px 0 7px;
+}
+
+.sb-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 14px; border-radius: 10px;
+  color: rgba(255,255,255,0.55);
+  font-size: 14px; font-style: italic;
+  cursor: pointer; transition: all .2s;
+  margin-bottom: 2px;
+  border: none; background: none; width: 100%; text-align: left;
+  position: relative;
+}
+.sb-item i { font-size: 19px; flex-shrink: 0; font-style: normal; }
+.sb-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+.sb-item.active {
+  background: rgba(196,154,42,0.15);
+  color: var(--gold2);
+  border: 1px solid rgba(196,154,42,0.25);
+}
+.sb-item.active i { color: var(--gold2); }
+.sb-item.active::before {
+  content: '';
+  position: absolute; left: 0; top: 22%; bottom: 22%;
+  width: 3px; border-radius: 2px;
+  background: var(--gold2);
+}
+
+.sb-div { height: 1px; background: rgba(255,255,255,0.07); margin: 8px 12px; }
+
+.sb-footer {
+  padding: 14px 24px 36px;
+  font-size: 11px; font-style: italic;
+  color: rgba(255,255,255,0.2);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+/* ── TOPBAR ── */
+#topbar {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(250,247,242,0.92);
+  backdrop-filter: blur(16px) saturate(150%);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; height: 56px;
+}
+.menu-btn {
+  width: 38px; height: 38px;
+  border: 1px solid var(--border2);
+  background: var(--beige2);
+  border-radius: 10px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all .18s;
+}
+.menu-btn:active { transform: scale(.93); background: var(--beige3); }
+.menu-btn i { font-size: 19px; color: var(--navy); }
+.tb-title {
+  flex: 1; font-size: 17px; font-weight: 700;
+  font-style: italic; color: var(--navy);
+  letter-spacing: .02em;
+}
+.tb-pill {
+  background: var(--navy);
+  color: var(--gold2);
+  font-size: 11px; font-weight: 700;
+  padding: 4px 12px; border-radius: 20px;
+  letter-spacing: .07em;
+}
+
+/* ── MAIN ── */
+#main {
+  position: relative; z-index: 1;
+  padding: 16px; max-width: 600px;
+  margin: 0 auto; padding-bottom: 48px;
+}
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; animation: rise .26s ease; }
+@keyframes rise { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── SECTION HEADING ── */
+.sh {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: baseline; gap: 10px;
+}
+.sh h2 { font-size: 26px; font-weight: 700; font-style: italic; color: var(--navy); line-height: 1; }
+.sh span { font-size: 13px; color: var(--text3); }
+
+/* ── CARD ── */
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.card-hdr {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .13em; text-transform: uppercase;
+  color: var(--text3);
+  background: var(--beige);
+  display: flex; align-items: center; gap: 7px;
+}
+.card-hdr i { font-size: 14px; color: var(--navy2); }
+.card-body { padding: 16px; }
+
+/* ── FORM ── */
+.field { margin-bottom: 12px; }
+.field label {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text3);
+  display: block; margin-bottom: 5px;
+}
+.field select, .field input {
+  width: 100%; padding: 11px 13px;
+  background: var(--beige);
+  border: 1px solid var(--border2);
+  border-radius: 9px;
+  color: var(--text); font-family: Cambria, Georgia, serif;
+  font-size: 14px; appearance: none; outline: none;
+  transition: border-color .2s, background .2s;
+}
+.field select:focus, .field input:focus {
+  border-color: var(--blue); background: var(--sky);
+}
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+/* ── TEMPO ── */
+.tempo-wrap {
+  background: var(--beige);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex; align-items: center; justify-content: center; gap: 0;
+}
+.tf { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.tf label {
+  font-size: 9px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--text3);
+}
+.tf input {
+  width: 100%; border: none !important; background: transparent !important;
+  text-align: center; font-family: Cambria, Georgia, serif;
+  font-size: 38px; font-weight: 700; color: var(--navy);
+  outline: none; padding: 0 !important;
+  -moz-appearance: textfield;
+}
+.tf input::-webkit-outer-spin-button,
+.tf input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.tsep {
+  font-size: 34px; font-weight: 300; color: var(--text3);
+  padding: 0 4px; align-self: center; padding-bottom: 6px;
+}
+
+/* ── BUTTON ── */
+.btn-main {
+  width: 100%;
+  background: var(--navy);
+  color: #fff; border: none;
+  border-radius: 11px; padding: 15px;
+  font-family: Cambria, Georgia, serif;
+  font-size: 15px; font-weight: 700; font-style: italic;
+  letter-spacing: .04em; cursor: pointer; margin-top: 6px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 6px 24px rgba(13,43,82,0.25);
+  transition: transform .15s, background .15s, box-shadow .15s;
+}
+.btn-main:active { transform: scale(.97); background: var(--navy2); box-shadow: 0 3px 12px rgba(13,43,82,0.2); }
+.btn-main i { font-size: 17px; }
+
+/* ── PCT GRID ── */
+.pct-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
+.pct-cell { border-radius: 11px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06); }
+.pct-top {
+  padding: 7px 4px 5px; text-align: center;
+  font-size: 12px; font-weight: 700; font-style: italic;
+  color: #fff; letter-spacing: .03em;
+}
+.pct-val {
+  padding: 8px 4px 9px; text-align: center;
+  font-family: Cambria, Georgia, serif;
+  font-size: 17px; font-weight: 700; color: #fff;
+  background: rgba(0,0,0,0.18); letter-spacing: .02em;
+}
+
+/* ── ALL TABLE ── */
+.all-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--r); }
+.all-table { min-width: 560px; width: 100%; border-collapse: collapse; }
+.all-table thead tr { background: var(--navy); }
+.all-table thead th {
+  padding: 10px 6px;
+  font-family: Cambria, Georgia, serif;
+  font-size: 10px; font-weight: 700; font-style: italic;
+  color: rgba(255,255,255,0.55);
+  text-align: center; border-bottom: 2px solid rgba(255,255,255,0.1);
+  letter-spacing: .04em;
+}
+.all-table thead th:first-child { text-align: left; padding-left: 14px; min-width: 82px; }
+.all-table thead .pct-th { padding: 0; }
+.pct-th-in {
+  padding: 8px 4px 6px;
+  display: flex; flex-direction: column; align-items: center;
+  font-family: Cambria, Georgia, serif;
+  font-size: 11px; font-weight: 700; font-style: italic; color: #fff;
+}
+.all-table tbody tr { border-bottom: 1px solid var(--border); transition: background .14s; }
+.all-table tbody tr:last-child { border-bottom: none; }
+.all-table tbody tr:hover { background: var(--sky); }
+.all-table td {
+  padding: 10px 6px; text-align: center;
+  font-family: Cambria, Georgia, serif;
+  font-size: 13px; font-weight: 700; color: var(--navy);
+}
+.all-table td:first-child {
+  text-align: left; padding-left: 14px;
+  font-size: 14px; font-style: italic; color: var(--text);
+}
+
+/* ── HISTORY ── */
+.child-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.child-chip {
+  background: var(--beige);
+  border: 1px solid var(--border2);
+  border-radius: 11px; padding: 15px 8px;
+  text-align: center; cursor: pointer;
+  font-family: Cambria, Georgia, serif;
+  font-size: 14px; font-style: italic; font-weight: 400;
+  color: var(--text2); transition: all .18s;
+}
+.child-chip:hover, .child-chip.sel {
+  background: var(--navy); color: var(--gold2);
+  border-color: var(--navy);
+  box-shadow: 0 4px 16px rgba(13,43,82,0.2);
+}
+
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--navy2); font-size: 14px; font-style: italic;
+  cursor: pointer; border: none; background: none;
+  padding: 0; margin-bottom: 14px;
+  font-family: Cambria, Georgia, serif;
+}
+.back-btn:hover { color: var(--navy); }
+
+.dist-label-wrap { margin: 4px 0 10px; }
+.dist-label {
+  display: inline-block;
+  font-family: Cambria, Georgia, serif;
+  font-size: 11px; font-weight: 700; font-style: italic;
+  letter-spacing: .05em; color: var(--navy);
+  padding: 4px 14px;
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  background: var(--sky);
+}
+
+.hist-entry {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.hist-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  background: var(--beige);
+}
+.hist-date {
+  font-size: 12px; color: var(--text3); font-style: italic;
+  display: flex; align-items: center; gap: 5px;
+}
+.hist-tempo {
+  font-family: Cambria, Georgia, serif;
+  font-size: 26px; font-weight: 700; color: var(--navy);
+}
+.hist-pct-row { display: grid; grid-template-columns: repeat(9,1fr); }
+.hist-pct-cell {
+  text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.2);
+}
+.hist-pct-cell:last-child { border-right: none; }
+.hist-pct-lbl {
+  font-family: Cambria, Georgia, serif;
+  font-size: 9px; font-weight: 700; font-style: italic;
+  padding: 5px 2px 3px; color: rgba(255,255,255,0.9);
+}
+.hist-pct-v {
+  font-family: Cambria, Georgia, serif;
+  font-size: 10px; font-weight: 700;
+  padding: 3px 2px 6px; color: rgba(255,255,255,0.85);
+  background: rgba(0,0,0,0.15);
+}
+.chart-wrap {
+  padding: 12px 14px 6px; border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+.chart-wrap canvas { max-height: 110px; width: 100%; }
+
+/* ── DELETE CONFIRM MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(13,43,82,0.4);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(3px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .22s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: #fff;
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 28px 24px 22px;
+  max-width: 320px; width: 100%;
+  box-shadow: 0 16px 48px rgba(13,43,82,0.18);
+  text-align: center;
+}
+.modal-icon {
+  width: 52px; height: 52px;
+  background: #fff0f0;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 14px;
+}
+.modal-icon i { font-size: 26px; color: #c0392b; }
+.modal h3 { font-size: 18px; font-weight: 700; font-style: italic; color: var(--navy); margin-bottom: 8px; }
+.modal p { font-size: 13px; font-style: italic; color: var(--text2); line-height: 1.6; margin-bottom: 20px; }
+.modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn-cancel {
+  padding: 12px; border-radius: 10px;
+  border: 1px solid var(--border2);
+  background: var(--beige);
+  font-family: Cambria, Georgia, serif;
+  font-size: 14px; font-style: italic;
+  color: var(--text2); cursor: pointer;
+  transition: background .15s;
+}
+.btn-cancel:hover { background: var(--beige3); }
+.btn-delete {
+  padding: 12px; border-radius: 10px;
+  border: none; background: #c0392b;
+  font-family: Cambria, Georgia, serif;
+  font-size: 14px; font-style: italic; font-weight: 700;
+  color: #fff; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(192,57,43,0.3);
+  transition: background .15s, transform .12s;
+}
+.btn-delete:active { transform: scale(.97); background: #a93226; }
+
+/* ── MISC ── */
+.empty {
+  text-align: center; padding: 44px 20px;
+  color: var(--text3);
+}
+.empty i { font-size: 36px; display: block; margin: 0 auto 10px; opacity: .3; }
+.empty span { font-size: 14px; font-style: italic; }
+
+#toast {
+  position: fixed; bottom: 26px;
+  left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--navy);
+  border: 1px solid rgba(196,154,42,0.3);
+  color: #fff;
+  padding: 12px 22px; border-radius: 30px;
+  font-family: Cambria, Georgia, serif;
+  font-size: 13px; font-style: italic;
+  z-index: 999;
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 28px rgba(13,43,82,0.3);
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast i { font-size: 15px; color: var(--gold2); }
+#toast.err i { color: #f87171; }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--beige); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sb-hero">
+    <div class="sb-monogram"><i class="ti ti-ripple"></i></div>
+    <div class="sb-title">Aqua <em>Pro</em></div>
+    <div class="sb-sub">Треньорски калкулатор за серии</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-lbl">Основно</div>
+    <button class="sb-item active" onclick="nav('enter')">
+      <i class="ti ti-calculator"></i><span>Въведи темпо</span>
+    </button>
+    <button class="sb-item" onclick="nav('all')">
+      <i class="ti ti-users"></i><span>Всички деца</span>
+    </button>
+    <button class="sb-item" onclick="nav('history')">
+      <i class="ti ti-chart-line"></i><span>История</span>
+    </button>
+    <button class="sb-item" onclick="nav('delete')">
+      <i class="ti ti-trash"></i><span>Изтриване</span>
+    </button>
+  </div>
+  <div class="sb-footer">© 2025 · Aqua Pro</div>
+</nav>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <button class="menu-btn" onclick="openSidebar()">
+    <i class="ti ti-menu-2"></i>
+  </button>
+  <span class="tb-title" id="tb-title">Въведи темпо</span>
+  <span class="tb-pill" id="tb-pill">25М</span>
+</div>
+
+<div id="main">
+
+  <!-- VIEW: ENTER -->
+  <div class="view active" id="view-enter">
+    <div class="sh"><h2>Темпо</h2><span>въведи резултат</span></div>
+
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-adjustments-horizontal"></i>Параметри</div>
+      <div class="card-body">
+        <div class="g2">
+          <div class="field">
+            <label>Дете</label>
+            <select id="e-child">
+              <option value="">— избери —</option>
+              <option>Алекс</option><option>Симона</option><option>Павел</option>
+              <option>Тео</option><option>Яна</option><option>Виктор</option>
+              <option>Мартин</option><option>Олег</option><option>Сиана</option>
+              <option>Никола</option><option>Вели</option><option>Диди</option><option>Олексей</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Басейн</label>
+            <select id="e-pool" onchange="updatePill()">
+              <option value="25">Малък · 25м</option>
+              <option value="50">Голям · 50м</option>
+            </select>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="field">
+            <label>Стил</label>
+            <select id="e-style" onchange="fillDists('e-dist',this.value)">
+              <option value="crawl">Кроул</option>
+              <option value="back">Гръб</option>
+              <option value="fly">Делфин</option>
+              <option value="breast">Бруст</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Дистанция</label>
+            <select id="e-dist"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Темпо (мин : сек . стотни)</label>
+          <div class="tempo-wrap">
+            <div class="tf"><label>мин</label><input type="number" id="t-min" placeholder="0" min="0" max="9"></div>
+            <span class="tsep">:</span>
+            <div class="tf"><label>сек</label><input type="number" id="t-sec" placeholder="00" min="0" max="59"></div>
+            <span class="tsep">.</span>
+            <div class="tf"><label>сот</label><input type="number" id="t-hun" placeholder="00" min="0" max="99"></div>
+          </div>
+        </div>
+        <button class="btn-main" onclick="calcAndSave()">
+          <i class="ti ti-bolt"></i>Изчисли серии
+        </button>
+      </div>
+    </div>
+
+    <div id="enter-results" style="display:none">
+      <div class="card">
+        <div class="card-hdr" id="res-hdr"><i class="ti ti-target"></i>Серийни цели</div>
+        <div class="card-body" style="padding:14px">
+          <div class="pct-grid" id="res-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW: ALL -->
+  <div class="view" id="view-all">
+    <div class="sh"><h2>Всички деца</h2><span>наведнъж</span></div>
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-filter"></i>Филтри</div>
+      <div class="card-body">
+        <div class="g3">
+          <div class="field">
+            <label>Басейн</label>
+            <select id="a-pool" onchange="loadAll()">
+              <option value="25">25м</option>
+              <option value="50">50м</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Стил</label>
+            <select id="a-style" onchange="syncAD();loadAll()">
+              <option value="crawl">Кроул</option>
+              <option value="back">Гръб</option>
+              <option value="fly">Делфин</option>
+              <option value="breast">Бруст</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Дистанция</label>
+            <select id="a-dist" onchange="loadAll()"></select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="all-body"></div>
+  </div>
+
+  <!-- VIEW: HISTORY -->
+  <div class="view" id="view-history">
+    <div class="sh"><h2>История</h2><span>прогрес по дете</span></div>
+    <div id="hist-list">
+      <div class="card">
+        <div class="card-hdr"><i class="ti ti-users"></i>Избери дете</div>
+        <div class="card-body">
+          <div class="child-grid" id="child-grid"></div>
+        </div>
+      </div>
+    </div>
+    <div id="hist-child" style="display:none">
+      <button class="back-btn" onclick="backToList()"><i class="ti ti-arrow-left"></i>Обратно</button>
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-body" style="padding:14px 16px">
+          <div style="font-size:22px;font-weight:700;font-style:italic;color:var(--navy)" id="hc-name"></div>
+          <div style="font-size:12px;font-style:italic;color:var(--text3);margin-top:3px">Пълна история на резултатите</div>
+          <div class="g2" style="margin-top:12px;margin-bottom:0">
+            <div class="field" style="margin-bottom:0">
+              <label>Басейн</label>
+              <select id="hc-pool" onchange="renderCH()">
+                <option value="">Всички</option>
+                <option value="25">25м</option><option value="50">50м</option>
+              </select>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Стил</label>
+              <select id="hc-style" onchange="renderCH()">
+                <option value="">Всички</option>
+                <option value="crawl">Кроул</option>
+                <option value="back">Гръб</option>
+                <option value="fly">Делфин</option>
+                <option value="breast">Бруст</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="hc-body"></div>
+    </div>
+  </div>
+
+  <!-- VIEW: DELETE -->
+  <div class="view" id="view-delete">
+    <div class="sh"><h2>Изтриване</h2><span>управление на данни</span></div>
+    <div id="del-list">
+      <div class="card">
+        <div class="card-hdr"><i class="ti ti-users"></i>Избери дете</div>
+        <div class="card-body">
+          <div class="child-grid" id="del-child-grid"></div>
+        </div>
+      </div>
+    </div>
+    <div id="del-child-view" style="display:none">
+      <button class="back-btn" onclick="backToDelList()"><i class="ti ti-arrow-left"></i>Обратно</button>
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-body" style="padding:14px 16px">
+          <div style="font-size:22px;font-weight:700;font-style:italic;color:var(--navy)" id="del-child-name"></div>
+          <div style="font-size:12px;font-style:italic;color:var(--text3);margin-top:3px">Избери записи за изтриване</div>
+          <div class="g2" style="margin-top:12px;margin-bottom:0">
+            <div class="field" style="margin-bottom:0">
+              <label>Басейн</label>
+              <select id="del-pool" onchange="renderDelRecords()">
+                <option value="">Всички</option>
+                <option value="25">25м</option><option value="50">50м</option>
+              </select>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Стил</label>
+              <select id="del-style" onchange="renderDelRecords()">
+                <option value="">Всички</option>
+                <option value="crawl">Кроул</option>
+                <option value="back">Гръб</option>
+                <option value="fly">Делфин</option>
+                <option value="breast">Бруст</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="del-records-body"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay" id="del-modal">
+  <div class="modal">
+    <div class="modal-icon"><i class="ti ti-trash"></i></div>
+    <h3>Изтриване</h3>
+    <p id="del-modal-text">Сигурен ли си, че искаш да изтриеш този запис?</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeDelModal()">Отказ</button>
+      <button class="btn-delete" onclick="confirmDelete()">Изтрий</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><i class="ti ti-check"></i><span id="toast-msg">Запазено</span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const SB='https://nlwgxonjqnvwgdaqxwtv.supabase.co/rest/v1';
+const KEY='sb_publishable_TaMIverYZ06q1x7Hbn_n6A_nf_LcZob';
+const H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
+
+const PCTS=[0.97,0.95,0.92,0.90,0.89,0.88,0.86,0.80,0.75];
+const PCOL={0.97:'#9b0000',0.95:'#bf2200',0.92:'#d44000',0.90:'#c86000',
+            0.89:'#c08000',0.88:'#a89200',0.86:'#809800',0.80:'#3a9400',0.75:'#007a40'};
+const SLB={crawl:'Кроул',back:'Гръб',fly:'Делфин',breast:'Бруст'};
+const SF={crawl:1.0,back:1.10,fly:1.05,breast:1.18};
+const CD=[50,75,100,150,200,250,300,350,400];
+const SD=[50,100,200,400];
+let curChild=null,cData=[],charts={};
+const VIEWS=['enter','all','history','delete'];
+const VT={enter:'Въведи темпо',all:'Всички деца',history:'История',delete:'Изтриване'};
+
+function getDists(s){return s==='crawl'?CD:SD;}
+function fillDists(id,style){
+  const s=document.getElementById(id);
+  const c=parseInt(s.value);
+  s.innerHTML=getDists(style).map(d=>`<option value="${d}">${d}м</option>`).join('');
+  if(getDists(style).includes(c))s.value=c;
+}
+function fmt(h){
+  if(!h||h<=0)return'—';
+  h=Math.round(h);
+  const m=Math.floor(h/6000),r=h%6000,s=Math.floor(r/100),c=r%100;
+  return m>0?m+':'+String(s).padStart(2,'0')+'.'+String(c).padStart(2,'0'):s+'.'+String(c).padStart(2,'0');
+}
+function parse(m,s,c){return(parseInt(m)||0)*6000+(parseInt(s)||0)*100+(parseInt(c)||0);}
+
+function toast(msg,err){
+  const t=document.getElementById('toast');
+  t.querySelector('i').className=err?'ti ti-x':'ti ti-check';
+  t.classList.toggle('err',!!err);
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2600);
+}
+function updatePill(){document.getElementById('tb-pill').textContent=document.getElementById('e-pool').value+'М';}
+function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('overlay').classList.add('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
+
+function nav(v){
+  closeSidebar();
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach((b,i)=>b.classList.toggle('active',VIEWS[i]===v));
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('tb-title').textContent=VT[v];
+  if(v==='all'){syncAD();loadAll();}
+  if(v==='history')loadHistList();
+  if(v==='delete')loadDelList();
+}
+
+function calcAndSave(){
+  const child=document.getElementById('e-child').value;
+  const pool=document.getElementById('e-pool').value;
+  const style=document.getElementById('e-style').value;
+  const dist=document.getElementById('e-dist').value;
+  const base=parse(document.getElementById('t-min').value,document.getElementById('t-sec').value,document.getElementById('t-hun').value);
+  if(!child){toast('Избери дете!',true);return;}
+  if(base<=0){toast('Въведи темпо!',true);return;}
+  const adj=base*SF[style];
+  document.getElementById('res-hdr').innerHTML=`<i class="ti ti-target"></i>${child} · ${SLB[style]} · ${dist}м · ${pool}м`;
+  document.getElementById('res-grid').innerHTML=PCTS.map(p=>`
+    <div class="pct-cell">
+      <div class="pct-top" style="background:${PCOL[p]}">${Math.round(p*100)}%</div>
+      <div class="pct-val" style="background:${PCOL[p]}">${fmt(Math.round(adj/p))}</div>
+    </div>`).join('');
+  document.getElementById('enter-results').style.display='block';
+  document.getElementById('enter-results').scrollIntoView({behavior:'smooth',block:'nearest'});
+
+  fetch(SB+'/swim_times',{method:'POST',headers:{...H,'Prefer':'return=minimal'},
+    body:JSON.stringify({child_name:child,pool_size:parseInt(pool),distance:parseInt(dist),
+      stroke:style,time_min:parseInt(document.getElementById('t-min').value)||0,
+      time_sec:parseInt(document.getElementById('t-sec').value)||0,
+      time_hun:parseInt(document.getElementById('t-hun').value)||0,
+      time_hundredths:base,recorded_at:new Date().toISOString()})})
+    .then(r=>r.ok||r.status===201?toast('Запазено успешно'):toast('Грешка при запис',true))
+    .catch(()=>toast('Грешка при запис',true));
+}
+
+function syncAD(){fillDists('a-dist',document.getElementById('a-style').value);}
+async function loadAll(){
+  const pool=document.getElementById('a-pool').value,style=document.getElementById('a-style').value,dist=document.getElementById('a-dist').value;
+  const el=document.getElementById('all-body');
+  el.innerHTML='<div class="empty"><i class="ti ti-loader"></i><span>Зареждане…</span></div>';
+  try{
+    const r=await fetch(SB+`/swim_times?pool_size=eq.${pool}&distance=eq.${dist}&stroke=eq.${style}&order=child_name.asc`,{headers:H});
+    const d=await r.json();
+    if(!Array.isArray(d)||!d.length){el.innerHTML='<div class="empty"><i class="ti ti-mood-empty"></i><span>Няма данни</span></div>';return;}
+    const bc={};
+    d.forEach(row=>{if(!bc[row.child_name]||row.time_hundredths<bc[row.child_name].time_hundredths)bc[row.child_name]=row;});
+    const kids=Object.values(bc).sort((a,b)=>a.child_name.localeCompare(b.child_name,'bg'));
+    const fac=SF[style];
+    let html=`<div class="card"><div class="all-wrap"><table class="all-table"><thead><tr><th>Дете</th>`;
+    PCTS.forEach(p=>{html+=`<th class="pct-th" style="background:${PCOL[p]}"><div class="pct-th-in">${Math.round(p*100)}%</div></th>`;});
+    html+='</tr></thead><tbody>';
+    kids.forEach(row=>{
+      const adj=row.time_hundredths*fac;
+      html+=`<tr><td>${row.child_name}</td>`;
+      PCTS.forEach(p=>{html+=`<td>${fmt(Math.round(adj/p))}</td>`;});
+      html+='</tr>';
+    });
+    html+='</tbody></table></div></div>';
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty"><i class="ti ti-alert-circle"></i><span>Грешка</span></div>';}
+}
+
+async function loadHistList(){
+  const el=document.getElementById('child-grid');
+  el.innerHTML='<span style="color:var(--text3);font-style:italic;font-size:13px">Зареждане…</span>';
+  try{
+    const r=await fetch(SB+'/swim_times?select=child_name&order=child_name.asc',{headers:H});
+    const d=await r.json();
+    const names=[...new Set(d.map(x=>x.child_name))].sort((a,b)=>a.localeCompare(b,'bg'));
+    el.innerHTML=names.length
+      ?names.map(n=>`<div class="child-chip" onclick="openChild('${n}')">${n}</div>`).join('')
+      :'<span style="color:var(--text3);font-style:italic;font-size:13px">Няма записи</span>';
+  }catch(e){el.innerHTML='<span style="color:var(--text3)">Грешка</span>';}
+}
+
+async function openChild(name){
+  curChild=name;
+  document.getElementById('hc-name').textContent=name;
+  document.getElementById('hist-list').style.display='none';
+  document.getElementById('hist-child').style.display='block';
+  document.getElementById('hc-pool').value='';
+  document.getElementById('hc-style').value='';
+  try{
+    const r=await fetch(SB+`/swim_times?child_name=eq.${encodeURIComponent(name)}&order=recorded_at.asc`,{headers:H});
+    cData=await r.json();
+    renderCH();
+  }catch(e){document.getElementById('hc-body').innerHTML='<div class="empty"><i class="ti ti-alert-circle"></i><span>Грешка</span></div>';}
+}
+
+function backToList(){
+  document.getElementById('hist-list').style.display='block';
+  document.getElementById('hist-child').style.display='none';
+  Object.values(charts).forEach(c=>c.destroy());charts={};
+}
+
+function renderCH(){
+  const pool=document.getElementById('hc-pool').value,style=document.getElementById('hc-style').value;
+  let data=cData;
+  if(pool)data=data.filter(r=>r.pool_size==pool);
+  if(style)data=data.filter(r=>r.stroke===style);
+  const el=document.getElementById('hc-body');
+  Object.values(charts).forEach(c=>c.destroy());charts={};
+  if(!data.length){el.innerHTML='<div class="empty"><i class="ti ti-mood-empty"></i><span>Няма записи</span></div>';return;}
+  const bk={};
+  data.forEach(r=>{const k=r.pool_size+'|'+r.distance+'|'+r.stroke;if(!bk[k])bk[k]=[];bk[k].push(r);});
+  el.innerHTML='';
+  Object.keys(bk).sort().forEach(k=>{
+    const [p,d,s]=k.split('|');
+    const rows=bk[k];
+    const fac=SF[s];
+    const block=document.createElement('div');
+    block.innerHTML=`<div class="dist-label-wrap"><span class="dist-label">${SLB[s]} · ${d}м · ${p}м басейн</span></div>`;
+
+    if(rows.length>1){
+      const cid='ch-'+k.replace(/\|/g,'-');
+      const cw=document.createElement('div');
+      cw.innerHTML=`<div class="card" style="margin-bottom:8px"><div class="chart-wrap"><canvas id="${cid}"></canvas></div></div>`;
+      block.appendChild(cw);
+      setTimeout(()=>{
+        const canvas=document.getElementById(cid);if(!canvas)return;
+        const labels=rows.map(r=>new Date(r.recorded_at).toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit'}));
+        const vals=rows.map(r=>r.time_hundredths/100);
+        charts[cid]=new Chart(canvas,{type:'line',
+          data:{labels,datasets:[{data:vals,borderColor:'#2e6ab4',backgroundColor:'rgba(46,106,180,0.08)',
+            pointRadius:4,pointBackgroundColor:'#2e6ab4',pointBorderColor:'#fff',
+            pointBorderWidth:2,tension:.38,fill:true,borderWidth:2}]},
+          options:{responsive:true,maintainAspectRatio:true,
+            plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(Math.round(c.raw*100))},
+              backgroundColor:'rgba(13,43,82,0.9)',borderColor:'rgba(13,43,82,0.15)',borderWidth:1,
+              titleFont:{family:'Cambria',size:11},bodyFont:{family:'Cambria',size:13}}},
+            scales:{y:{reverse:true,grid:{color:'rgba(0,0,0,0.05)'},
+              ticks:{callback:v=>fmt(Math.round(v*100)),color:'#8a7860',font:{size:10,family:'Cambria'}}},
+              x:{grid:{color:'rgba(0,0,0,0.04)'},
+              ticks:{color:'#8a7860',font:{size:10,family:'Cambria'}}}}}});
+      },80);
+    }
+
+    rows.slice().reverse().forEach(r=>{
+      const adj=r.time_hundredths*fac;
+      const date=new Date(r.recorded_at).toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit',year:'numeric'});
+      const entry=document.createElement('div');
+      entry.className='hist-entry';
+      entry.innerHTML=
+        `<div class="hist-top">
+          <span class="hist-date"><i class="ti ti-calendar" style="font-size:12px"></i>${date}</span>
+          <span class="hist-tempo">${fmt(r.time_hundredths)}</span>
+        </div>
+        <div class="hist-pct-row">
+          ${PCTS.map(p=>`<div class="hist-pct-cell" style="background:${PCOL[p]}">
+            <div class="hist-pct-lbl">${Math.round(p*100)}%</div>
+            <div class="hist-pct-v">${fmt(Math.round(adj/p))}</div>
+          </div>`).join('')}
+        </div>`;
+      block.appendChild(entry);
+    });
+    el.appendChild(block);
+  });
+}
+
+
+// ── DELETE ──
+let delData=[], pendingDelId=null, pendingDelChild=null;
+
+async function loadDelList(){
+  const el=document.getElementById('del-child-grid');
+  el.innerHTML='<span style="color:var(--text3);font-style:italic;font-size:13px">Зареждане…</span>';
+  try{
+    const r=await fetch(SB+'/swim_times?select=child_name&order=child_name.asc',{headers:H});
+    const d=await r.json();
+    const names=[...new Set(d.map(x=>x.child_name))].sort((a,b)=>a.localeCompare(b,'bg'));
+    el.innerHTML=names.length
+      ?names.map(n=>`<div class="child-chip" onclick="openDelChild('${n}')">${n}</div>`).join('')
+      :'<span style="color:var(--text3);font-style:italic;font-size:13px">Няма записи</span>';
+  }catch(e){el.innerHTML='<span style="color:var(--text3)">Грешка</span>';}
+}
+
+async function openDelChild(name){
+  pendingDelChild=name;
+  document.getElementById('del-child-name').textContent=name;
+  document.getElementById('del-list').style.display='none';
+  document.getElementById('del-child-view').style.display='block';
+  document.getElementById('del-pool').value='';
+  document.getElementById('del-style').value='';
+  try{
+    const r=await fetch(SB+`/swim_times?child_name=eq.${encodeURIComponent(name)}&order=recorded_at.desc`,{headers:H});
+    delData=await r.json();
+    renderDelRecords();
+  }catch(e){document.getElementById('del-records-body').innerHTML='<div class="empty"><i class="ti ti-alert-circle"></i><span>Грешка</span></div>';}
+}
+
+function backToDelList(){
+  document.getElementById('del-list').style.display='block';
+  document.getElementById('del-child-view').style.display='none';
+  delData=[];
+}
+
+function renderDelRecords(){
+  const pool=document.getElementById('del-pool').value;
+  const style=document.getElementById('del-style').value;
+  let data=delData;
+  if(pool) data=data.filter(r=>r.pool_size==pool);
+  if(style) data=data.filter(r=>r.stroke===style);
+  const el=document.getElementById('del-records-body');
+  if(!data.length){el.innerHTML='<div class="empty"><i class="ti ti-mood-empty"></i><span>Няма записи</span></div>';return;}
+
+  el.innerHTML='';
+  data.forEach(r=>{
+    const date=new Date(r.recorded_at).toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const entry=document.createElement('div');
+    entry.className='card';
+    entry.style.marginBottom='10px';
+    entry.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--beige);border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:11px;font-style:italic;color:var(--text3);margin-bottom:2px">${date} · ${SLB[r.stroke]} · ${r.distance}м · ${r.pool_size}м</div>
+          <div style="font-size:22px;font-weight:700;color:var(--navy);font-family:Cambria,Georgia,serif">${fmt(r.time_hundredths)}</div>
+        </div>
+        <button onclick="askDelete(${r.id},'${SLB[r.stroke]} ${r.distance}м ${date}')"
+          style="width:38px;height:38px;border-radius:10px;border:1px solid #f8d7d7;background:#fff0f0;
+          cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s"
+          onmouseover="this.style.background='#fde0e0'" onmouseout="this.style.background='#fff0f0'">
+          <i class="ti ti-trash" style="font-size:18px;color:#c0392b"></i>
+        </button>
+      </div>
+      <div class="hist-pct-row">
+        ${PCTS.map(p=>`<div class="hist-pct-cell" style="background:${PCOL[p]}">
+          <div class="hist-pct-lbl">${Math.round(p*100)}%</div>
+          <div class="hist-pct-v">${fmt(Math.round(r.time_hundredths*SF[r.stroke]/p))}</div>
+        </div>`).join('')}
+      </div>`;
+    el.appendChild(entry);
+  });
+}
+
+function askDelete(id, label){
+  pendingDelId=id;
+  document.getElementById('del-modal-text').textContent=`Изтрий записа "${label}"? Това действие не може да се отмени.`;
+  document.getElementById('del-modal').classList.add('open');
+}
+
+function closeDelModal(){
+  document.getElementById('del-modal').classList.remove('open');
+  pendingDelId=null;
+}
+
+async function confirmDelete(){
+  if(!pendingDelId) return;
+  const id=pendingDelId;
+  closeDelModal();
+  try{
+    const r=await fetch(SB+`/swim_times?id=eq.${id}`,{method:'DELETE',headers:H});
+    if(r.ok){
+      toast('Записът е изтрит');
+      delData=delData.filter(x=>x.id!==id);
+      renderDelRecords();
+      // refresh del list count
+      const el=document.getElementById('del-child-grid');
+      if(el) loadDelList();
+    } else { toast('Грешка при изтриване',true); }
+  }catch(e){ toast('Грешка при изтриване',true); }
+}
+
+fillDists('e-dist','crawl');
+fillDists('a-dist','crawl');
+</script>
+</body>
+</html>
