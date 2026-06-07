@@ -522,6 +522,18 @@ body::before {
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--beige); }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+.dist-style-tab {
+  flex: 1; padding: 10px 4px;
+  border: none; background: none;
+  font-family: Cambria, Georgia, serif;
+  font-size: 13px; font-style: italic;
+  color: var(--text2); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .18s;
+}
+.dist-style-tab:hover { color: var(--navy); }
+.dist-style-tab.active { color: var(--navy); border-bottom-color: var(--navy); font-weight: 700; }
 </style>
 </head>
 <body>
@@ -548,6 +560,12 @@ body::before {
     </button>
     <button class="sb-item" onclick="nav('delete')">
       <i class="ti ti-trash"></i><span>Изтриване</span>
+    </button>
+    <button class="sb-item" onclick="nav('children')">
+      <i class="ti ti-user-plus"></i><span>Деца</span>
+    </button>
+    <button class="sb-item" onclick="nav('distances')">
+      <i class="ti ti-ruler"></i><span>Дистанции</span>
     </button>
   </div>
   <div class="sb-footer">© 2025 · Aqua Pro</div>
@@ -577,7 +595,7 @@ body::before {
             <select id="e-child">
               <option value="">— избери —</option>
               <option>Алекс</option><option>Симона</option><option>Павел</option>
-              <option>Тео</option><option>Яна</option><option>Виктор</option>
+              <option>Яна</option><option>Карина</option>
               <option>Мартин</option><option>Олег</option><option>Сиана</option>
               <option>Никола</option><option>Вели</option><option>Диди</option><option>Олексей</option>
             </select>
@@ -750,6 +768,71 @@ body::before {
 
 </div>
 
+  <!-- VIEW: DISTANCES -->
+  <div class="view" id="view-distances">
+    <div class="sh"><h2>Дистанции</h2><span>управление</span></div>
+
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-plus"></i>Добави дистанция</div>
+      <div class="card-body">
+        <div class="field">
+          <label>Стил</label>
+          <select id="dist-style-sel">
+            <option value="crawl">Кроул</option>
+            <option value="back">Гръб</option>
+            <option value="fly">Делфин</option>
+            <option value="breast">Бруст</option>
+          </select>
+        </div>
+        <div class="g2" style="align-items:end">
+          <div class="field" style="margin-bottom:0">
+            <label>Метри</label>
+            <input type="number" id="new-dist-val" placeholder="напр. 800" min="1" max="9999">
+          </div>
+          <button class="btn-main" style="margin-top:0" onclick="addDist()">
+            <i class="ti ti-plus"></i>Добави
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-list"></i>Текущи дистанции</div>
+      <div class="card-body" style="padding:0">
+        <div style="display:flex;gap:0;border-bottom:1px solid var(--border)">
+          <button class="dist-style-tab active" onclick="selectDistTab('crawl',this)">Кроул</button>
+          <button class="dist-style-tab" onclick="selectDistTab('back',this)">Гръб</button>
+          <button class="dist-style-tab" onclick="selectDistTab('fly',this)">Делфин</button>
+          <button class="dist-style-tab" onclick="selectDistTab('breast',this)">Бруст</button>
+        </div>
+        <div id="dist-list" style="padding:4px 0"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW: CHILDREN -->
+  <div class="view" id="view-children">
+    <div class="sh"><h2>Деца</h2><span>управление на списъка</span></div>
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-user-plus"></i>Добави дете</div>
+      <div class="card-body">
+        <div class="g2" style="align-items:end">
+          <div class="field" style="margin-bottom:0">
+            <label>Име</label>
+            <input type="text" id="new-child-name" placeholder="напр. Мария" maxlength="40">
+          </div>
+          <button class="btn-main" style="margin-top:0" onclick="addChild()">
+            <i class="ti ti-plus"></i>Добави
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-users"></i>Текущи деца</div>
+      <div id="children-list" style="padding:8px 0"></div>
+    </div>
+  </div>
+
 <!-- DELETE CONFIRM MODAL -->
 <div class="modal-overlay" id="del-modal">
   <div class="modal">
@@ -765,6 +848,7 @@ body::before {
 
 <div id="toast"><i class="ti ti-check"></i><span id="toast-msg">Запазено</span></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 const SB='https://nlwgxonjqnvwgdaqxwtv.supabase.co/rest/v1';
@@ -776,13 +860,18 @@ const PCOL={0.97:'#9b0000',0.95:'#bf2200',0.92:'#d44000',0.90:'#c86000',
             0.89:'#c08000',0.88:'#a89200',0.86:'#809800',0.80:'#3a9400',0.75:'#007a40'};
 const SLB={crawl:'Кроул',back:'Гръб',fly:'Делфин',breast:'Бруст'};
 
-const CD=[50,75,100,150,200,250,300,350,400];
-const SD=[50,100,200,400];
+let DISTS = {
+  crawl: [50,75,100,150,200,250,300,350,400],
+  back:  [50,100,200,400],
+  fly:   [50,100,200,400],
+  breast:[50,100,200,400]
+};
 let curChild=null,cData=[],charts={};
-const VIEWS=['enter','all','history','delete'];
-const VT={enter:'Въведи темпо',all:'Всички деца',history:'История',delete:'Изтриване'};
+let activeDistTab='crawl';
+const VIEWS=['enter','all','history','delete','children','distances'];
+const VT={enter:'Въведи темпо',all:'Всички деца',history:'История',delete:'Изтриване',children:'Управление на деца',distances:'Дистанции'};
 
-function getDists(s){return s==='crawl'?CD:SD;}
+function getDists(s){return DISTS[s]||[50,100,200,400];}
 function fillDists(id,style){
   const s=document.getElementById(id);
   const c=parseInt(s.value);
@@ -818,6 +907,8 @@ function nav(v){
   if(v==='all'){syncAD();loadAll();}
   if(v==='history')loadHistList();
   if(v==='delete')loadDelList();
+  if(v==='children')loadChildrenMgmt();
+  if(v==='distances')renderDistMgmt();
 }
 
 function calcAndSave(){
@@ -839,13 +930,12 @@ function calcAndSave(){
   document.getElementById('enter-results').style.display='block';
   document.getElementById('enter-results').scrollIntoView({behavior:'smooth',block:'nearest'});
 
-  fetch(SB+'/swim_times',{method:'POST',headers:{...H,'Prefer':'return=minimal'},
-    body:JSON.stringify({child_name:child,pool_size:parseInt(pool),distance:parseInt(dist),
+  sbInsert('swim_times',{child_name:child,pool_size:parseInt(pool),distance:parseInt(dist),
       stroke:style,time_min:parseInt(document.getElementById('t-min').value)||0,
       time_sec:parseInt(document.getElementById('t-sec').value)||0,
       time_hun:parseInt(document.getElementById('t-hun').value)||0,
-      time_hundredths:base,recorded_at:new Date().toISOString()})})
-    .then(r=>r.ok||r.status===201?toast('Запазено успешно'):toast('Грешка при запис',true))
+      time_hundredths:base,recorded_at:new Date().toISOString()})
+    .then(()=>toast('Запазено успешно'))
     .catch(()=>toast('Грешка при запис',true));
 }
 
@@ -855,8 +945,8 @@ async function loadAll(){
   const el=document.getElementById('all-body');
   el.innerHTML='<div class="empty"><i class="ti ti-loader"></i><span>Зареждане…</span></div>';
   try{
-    const r=await fetch(SB+`/swim_times?pool_size=eq.${pool}&distance=eq.${dist}&stroke=eq.${style}&order=child_name.asc`,{headers:H});
-    const d=await r.json();
+    const { data: d, error: e1 } = await _db.from('swim_times').select('*').eq('pool_size',parseInt(pool)).eq('distance',parseInt(dist)).eq('stroke',style).order('child_name');
+    if(e1) throw e1;
     if(!Array.isArray(d)||!d.length){el.innerHTML='<div class="empty"><i class="ti ti-mood-empty"></i><span>Няма данни</span></div>';return;}
     const bc={};
     d.forEach(row=>{if(!bc[row.child_name]||row.time_hundredths<bc[row.child_name].time_hundredths)bc[row.child_name]=row;});
@@ -879,8 +969,8 @@ async function loadHistList(){
   const el=document.getElementById('child-grid');
   el.innerHTML='<span style="color:var(--text3);font-style:italic;font-size:13px">Зареждане…</span>';
   try{
-    const r=await fetch(SB+'/swim_times?select=child_name&order=child_name.asc',{headers:H});
-    const d=await r.json();
+    const { data: d, error: e2 } = await _db.from('swim_times').select('child_name').order('child_name');
+    if(e2) throw e2;
     const names=[...new Set(d.map(x=>x.child_name))].sort((a,b)=>a.localeCompare(b,'bg'));
     el.innerHTML=names.length
       ?names.map(n=>`<div class="child-chip" onclick="openChild('${n}')">${n}</div>`).join('')
@@ -896,8 +986,9 @@ async function openChild(name){
   document.getElementById('hc-pool').value='';
   document.getElementById('hc-style').value='';
   try{
-    const r=await fetch(SB+`/swim_times?child_name=eq.${encodeURIComponent(name)}&order=recorded_at.asc`,{headers:H});
-    cData=await r.json();
+    const { data: cData2, error: e3 } = await _db.from('swim_times').select('*').eq('child_name',name).order('recorded_at');
+    if(e3) throw e3;
+    cData=cData2;
     renderCH();
   }catch(e){document.getElementById('hc-body').innerHTML='<div class="empty"><i class="ti ti-alert-circle"></i><span>Грешка</span></div>';}
 }
@@ -980,8 +1071,8 @@ async function loadDelList(){
   const el=document.getElementById('del-child-grid');
   el.innerHTML='<span style="color:var(--text3);font-style:italic;font-size:13px">Зареждане…</span>';
   try{
-    const r=await fetch(SB+'/swim_times?select=child_name&order=child_name.asc',{headers:H});
-    const d=await r.json();
+    const { data: d, error: e2 } = await _db.from('swim_times').select('child_name').order('child_name');
+    if(e2) throw e2;
     const names=[...new Set(d.map(x=>x.child_name))].sort((a,b)=>a.localeCompare(b,'bg'));
     el.innerHTML=names.length
       ?names.map(n=>`<div class="child-chip" onclick="openDelChild('${n}')">${n}</div>`).join('')
@@ -997,8 +1088,9 @@ async function openDelChild(name){
   document.getElementById('del-pool').value='';
   document.getElementById('del-style').value='';
   try{
-    const r=await fetch(SB+`/swim_times?child_name=eq.${encodeURIComponent(name)}&order=recorded_at.desc`,{headers:H});
-    delData=await r.json();
+    const { data: dd, error: edd } = await _db.from('swim_times').select('*').eq('child_name',name).order('recorded_at',{ascending:false});
+    if(edd) throw edd;
+    delData=dd;
     renderDelRecords();
   }catch(e){document.getElementById('del-records-body').innerHTML='<div class="empty"><i class="ti ti-alert-circle"></i><span>Грешка</span></div>';}
 }
@@ -1064,8 +1156,8 @@ async function confirmDelete(){
   const id=pendingDelId;
   closeDelModal();
   try{
-    const r=await fetch(SB+`/swim_times?id=eq.${id}`,{method:'DELETE',headers:H});
-    if(r.ok){
+    const { error: edel } = await _db.from('swim_times').delete().eq('id',id);
+    if(!edel){
       toast('Записът е изтрит');
       delData=delData.filter(x=>x.id!==id);
       renderDelRecords();
@@ -1078,6 +1170,204 @@ async function confirmDelete(){
 
 fillDists('e-dist','crawl');
 fillDists('a-dist','crawl');
+
+// ── INIT SUPABASE CLIENT ──
+(function() {
+  try {
+    _db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log('Supabase client ready');
+  } catch(e) { console.log('Supabase client error', e); }
+})();
+
+// Override fetch functions to use Supabase JS client
+async function sbSelect(table, filters) {
+  if (!_db) return null;
+  let q = _db.from(table).select('*');
+  if (filters) Object.entries(filters).forEach(([k,v]) => { q = q.eq(k, v); });
+  const { data, error } = await q;
+  if (error) throw error;
+  return data;
+}
+async function sbInsert(table, row) {
+  if (!_db) return null;
+  const { error } = await _db.from(table).insert(row);
+  if (error) throw error;
+  return true;
+}
+async function sbDelete(table, filters) {
+  if (!_db) return null;
+  let q = _db.from(table).delete();
+  Object.entries(filters).forEach(([k,v]) => { q = q.eq(k, v); });
+  const { error } = await q;
+  if (error) throw error;
+  return true;
+}
+
+// ── CHILDREN MANAGEMENT ──
+let childrenList = [];
+
+async function loadChildrenMgmt() {
+  await fetchChildrenFromDB();
+  renderChildrenMgmt();
+}
+
+async function fetchChildrenFromDB() {
+  try {
+    const { data: d, error: ec } = await _db.from('swimmers').select('*').order('name');
+    if (ec) return;
+    if (Array.isArray(d)) {
+      childrenList = d.map(x => x.name);
+      refreshAllDropdowns();
+    }
+  } catch(e) { console.log('swimmers table not ready', e); }
+}
+
+function refreshAllDropdowns() {
+  ['e-child'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— избери —</option>' +
+      childrenList.map(n => `<option${n===cur?' selected':''}>${n}</option>`).join('');
+  });
+}
+
+function renderChildrenMgmt() {
+  const el = document.getElementById('children-list');
+  if (!childrenList.length) {
+    el.innerHTML = '<div class="empty" style="padding:20px"><i class="ti ti-mood-empty"></i><span>Няма деца</span></div>';
+    return;
+  }
+  el.innerHTML = childrenList.map((n,i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;
+      padding:11px 16px;border-bottom:${i<childrenList.length-1?'1px solid var(--border)':'none'}">
+      <span style="font-size:15px;font-style:italic;color:var(--text)">${n}</span>
+      <button onclick="removeChild('${n}')"
+        style="width:34px;height:34px;border-radius:9px;border:1px solid #f8d7d7;
+        background:#fff0f0;cursor:pointer;display:flex;align-items:center;justify-content:center;
+        transition:background .15s" onmouseover="this.style.background='#fde0e0'" onmouseout="this.style.background='#fff0f0'">
+        <i class="ti ti-x" style="font-size:16px;color:#c0392b"></i>
+      </button>
+    </div>`).join('');
+}
+
+async function addChild() {
+  const input = document.getElementById('new-child-name');
+  const name = input.value.trim();
+  if (!name) { toast('Въведи име!', true); return; }
+  if (childrenList.includes(name)) { toast('Детето вече е в списъка!', true); return; }
+  try {
+    const { error: ea } = await _db.from('swimmers').insert({name});
+    if (ea) { toast('Грешка при запис', true); return; }
+  } catch(e) { toast('Грешка при запис', true); return; }
+  childrenList.push(name);
+  childrenList.sort((a,b) => a.localeCompare(b,'bg'));
+  refreshAllDropdowns();
+  renderChildrenMgmt();
+  input.value = '';
+  toast(name + ' е добавено');
+}
+
+async function removeChild(name) {
+  try {
+    const { error: ed } = await _db.from('swimmers').delete().eq('name',name);
+    if (ed) { toast('Грешка при изтриване', true); return; }
+  } catch(e) { toast('Грешка при изтриване', true); return; }
+  childrenList = childrenList.filter(n => n !== name);
+  refreshAllDropdowns();
+  renderChildrenMgmt();
+  toast(name + ' е премахнато');
+}
+
+// Initialize on load
+setTimeout(fetchChildrenFromDB, 300);
+
+// ── DISTANCES MANAGEMENT ──
+async function fetchDistsFromDB() {
+  try {
+    const { data: d, error: efd } = await _db.from('distances').select('*').order('stroke').order('meters');
+    if (efd) return;
+    if (Array.isArray(d) && d.length > 0) {
+      DISTS = {crawl:[],back:[],fly:[],breast:[]};
+      d.forEach(row => {
+        if (DISTS[row.stroke]) DISTS[row.stroke].push(row.meters);
+      });
+      fillDists('e-dist', document.getElementById('e-style').value);
+      fillDists('a-dist', document.getElementById('a-style').value);
+    }
+  } catch(e) { console.log('distances table not ready', e); }
+}
+
+async function renderDistMgmt() {
+  await fetchDistsFromDB();
+  renderDistList(activeDistTab);
+}
+
+function selectDistTab(style, btn) {
+  activeDistTab = style;
+  document.querySelectorAll('.dist-style-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('dist-style-sel').value = style;
+  renderDistList(style);
+}
+
+function renderDistList(style) {
+  const el = document.getElementById('dist-list');
+  const dists = DISTS[style] || [];
+  if (!dists.length) {
+    el.innerHTML = '<div class="empty" style="padding:20px"><i class="ti ti-mood-empty"></i><span>Няма дистанции</span></div>';
+    return;
+  }
+  el.innerHTML = dists.map((d,i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;
+      padding:11px 16px;border-bottom:${i<dists.length-1?'1px solid var(--border)':'none'}">
+      <span style="font-size:16px;font-weight:700;color:var(--navy);font-family:Cambria,Georgia,serif">${d}<span style="font-size:12px;font-weight:400;font-style:italic;color:var(--text3);margin-left:3px">м</span></span>
+      <button onclick="removeDist('${style}',${d})"
+        style="width:34px;height:34px;border-radius:9px;border:1px solid #f8d7d7;
+        background:#fff0f0;cursor:pointer;display:flex;align-items:center;justify-content:center;
+        transition:background .15s" onmouseover="this.style.background='#fde0e0'" onmouseout="this.style.background='#fff0f0'">
+        <i class="ti ti-x" style="font-size:16px;color:#c0392b"></i>
+      </button>
+    </div>`).join('');
+}
+
+async function addDist() {
+  const style = document.getElementById('dist-style-sel').value;
+  const val = parseInt(document.getElementById('new-dist-val').value);
+  if (!val || val < 1) { toast('Въведи валидни метри!', true); return; }
+  if (DISTS[style].includes(val)) { toast('Дистанцията вече съществува!', true); return; }
+  try {
+    const { error: ead } = await _db.from('distances').insert({stroke: style, meters: val});
+    if (ead) { toast('Грешка при запис', true); return; }
+  } catch(e) { toast('Грешка при запис', true); return; }
+  DISTS[style].push(val);
+  DISTS[style].sort((a,b) => a-b);
+  fillDists('e-dist', document.getElementById('e-style').value);
+  fillDists('a-dist', document.getElementById('a-style').value);
+  activeDistTab = style;
+  document.querySelectorAll('.dist-style-tab').forEach((b,i) => {
+    b.classList.toggle('active', ['crawl','back','fly','breast'][i] === style);
+  });
+  renderDistList(style);
+  document.getElementById('new-dist-val').value = '';
+  toast(val + 'м добавено за ' + SLB[style]);
+}
+
+async function removeDist(style, val) {
+  if (DISTS[style].length <= 1) { toast('Трябва поне една дистанция!', true); return; }
+  try {
+    const { error: erd } = await _db.from('distances').delete().eq('stroke',style).eq('meters',val);
+    if (erd) { toast('Грешка при изтриване', true); return; }
+  } catch(e) { toast('Грешка при изтриване', true); return; }
+  DISTS[style] = DISTS[style].filter(d => d !== val);
+  fillDists('e-dist', document.getElementById('e-style').value);
+  fillDists('a-dist', document.getElementById('a-style').value);
+  renderDistList(style);
+  toast(val + 'м е премахнато');
+}
+
+// Load distances on start
+setTimeout(fetchDistsFromDB, 300);
 </script>
 </body>
 </html>
