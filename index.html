@@ -848,12 +848,15 @@ body::before {
 
 <div id="toast"><i class="ti ti-check"></i><span id="toast-msg">Запазено</span></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-const SB='https://nlwgxonjqnvwgdaqxwtv.supabase.co/rest/v1';
-const KEY='sb_publishable_TaMIverYZ06q1x7Hbn_n6A_nf_LcZob';
+const SUPABASE_URL='https://nlwgxonjqnvwgdaqxwtv.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2d4b25qcW52d2dkYXF4d3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MzI5NDcsImV4cCI6MjA5NjQwODk0N30.biALRgyjoRmvUlV5dCdhrBoKe2YN3wSIIRSDV52Imfo';
+const SB=SUPABASE_URL+'/rest/v1';
+const KEY=SUPABASE_KEY;
 const H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
+let _db=null;
 
 const PCTS=[0.97,0.95,0.92,0.90,0.89,0.88,0.86,0.80,0.75];
 const PCOL={0.97:'#9b0000',0.95:'#bf2200',0.92:'#d44000',0.90:'#c86000',
@@ -1174,7 +1177,8 @@ fillDists('a-dist','crawl');
 // ── INIT SUPABASE CLIENT ──
 (function() {
   try {
-    _db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { createClient } = window.supabase;
+    _db = createClient(SUPABASE_URL, SUPABASE_KEY);
     console.log('Supabase client ready');
   } catch(e) { console.log('Supabase client error', e); }
 })();
