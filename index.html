@@ -760,7 +760,7 @@ const PCTS=[0.97,0.95,0.92,0.90,0.89,0.88,0.86,0.80,0.75];
 const PCOL={0.97:'#9b0000',0.95:'#bf2200',0.92:'#d44000',0.90:'#c86000',
             0.89:'#c08000',0.88:'#a89200',0.86:'#809800',0.80:'#3a9400',0.75:'#007a40'};
 const SLB={crawl:'Кроул',back:'Гръб',fly:'Делфин',breast:'Бруст'};
-const SF={crawl:1.0,back:1.10,fly:1.05,breast:1.18};
+
 const CD=[50,75,100,150,200,250,300,350,400];
 const SD=[50,100,200,400];
 let curChild=null,cData=[],charts={};
@@ -813,7 +813,7 @@ function calcAndSave(){
   const base=parse(document.getElementById('t-min').value,document.getElementById('t-sec').value,document.getElementById('t-hun').value);
   if(!child){toast('Избери дете!',true);return;}
   if(base<=0){toast('Въведи темпо!',true);return;}
-  const adj=base*SF[style];
+  const adj=base;
   document.getElementById('res-hdr').innerHTML=`<i class="ti ti-target"></i>${child} · ${SLB[style]} · ${dist}м · ${pool}м`;
   document.getElementById('res-grid').innerHTML=PCTS.map(p=>`
     <div class="pct-cell">
@@ -845,12 +845,11 @@ async function loadAll(){
     const bc={};
     d.forEach(row=>{if(!bc[row.child_name]||row.time_hundredths<bc[row.child_name].time_hundredths)bc[row.child_name]=row;});
     const kids=Object.values(bc).sort((a,b)=>a.child_name.localeCompare(b.child_name,'bg'));
-    const fac=SF[style];
     let html=`<div class="card"><div class="all-wrap"><table class="all-table"><thead><tr><th>Дете</th>`;
     PCTS.forEach(p=>{html+=`<th class="pct-th" style="background:${PCOL[p]}"><div class="pct-th-in">${Math.round(p*100)}%</div></th>`;});
     html+='</tr></thead><tbody>';
     kids.forEach(row=>{
-      const adj=row.time_hundredths*fac;
+      const adj=row.time_hundredths;
       html+=`<tr><td>${row.child_name}</td>`;
       PCTS.forEach(p=>{html+=`<td>${fmt(Math.round(adj/p))}</td>`;});
       html+='</tr>';
@@ -907,7 +906,6 @@ function renderCH(){
   Object.keys(bk).sort().forEach(k=>{
     const [p,d,s]=k.split('|');
     const rows=bk[k];
-    const fac=SF[s];
     const block=document.createElement('div');
     block.innerHTML=`<div class="dist-label-wrap"><span class="dist-label">${SLB[s]} · ${d}м · ${p}м басейн</span></div>`;
 
@@ -936,7 +934,7 @@ function renderCH(){
     }
 
     rows.slice().reverse().forEach(r=>{
-      const adj=r.time_hundredths*fac;
+      const adj=r.time_hundredths;
       const date=new Date(r.recorded_at).toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit',year:'numeric'});
       const entry=document.createElement('div');
       entry.className='hist-entry';
@@ -1025,7 +1023,7 @@ function renderDelRecords(){
       <div class="hist-pct-row">
         ${PCTS.map(p=>`<div class="hist-pct-cell" style="background:${PCOL[p]}">
           <div class="hist-pct-lbl">${Math.round(p*100)}%</div>
-          <div class="hist-pct-v">${fmt(Math.round(r.time_hundredths*SF[r.stroke]/p))}</div>
+          <div class="hist-pct-v">${fmt(Math.round(r.time_hundredths/p))}</div>
         </div>`).join('')}
       </div>`;
     el.appendChild(entry);
