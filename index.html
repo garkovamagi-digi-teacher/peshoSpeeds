@@ -1139,6 +1139,16 @@ const KEY=SUPABASE_KEY;
 const H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
 let _db=null;
 
+// ── INIT SUPABASE CLIENT ──
+(function() {
+  try {
+    const { createClient } = window.supabase;
+    _db = createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log('Supabase client ready');
+  } catch(e) { console.log('Supabase client error', e); }
+})();
+
+
 const PCTS=[0.97,0.95,0.92,0.90,0.89,0.88,0.86,0.80,0.75];
 const PCOL={0.97:'#9b0000',0.95:'#bf2200',0.92:'#d44000',0.90:'#c86000',
             0.89:'#c08000',0.88:'#a89200',0.86:'#809800',0.85:'#5a9200',0.80:'#3a9400',0.75:'#007a40'};
