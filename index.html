@@ -534,6 +534,65 @@ body::before {
 }
 .dist-style-tab:hover { color: var(--navy); }
 .dist-style-tab.active { color: var(--navy); border-bottom-color: var(--navy); font-weight: 700; }
+
+/* ── WELLNESS ── */
+.wellness-group-label {
+  font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text3); margin:16px 0 8px; padding-bottom:4px;
+  border-bottom:1px solid var(--border);
+}
+.wellness-row {
+  display:flex; flex-direction:column; gap:8px;
+  padding:12px 0; border-bottom:1px solid var(--border);
+}
+.wellness-row:last-of-type { border-bottom:none; }
+.wellness-label { font-size:13px; font-style:italic; color:var(--text2); text-align:center; }
+.wellness-rag { display:flex; gap:10px; justify-content:center; }
+.rag-btn {
+  width:42px; height:42px; border-radius:50%;
+  border:2px solid var(--border2);
+  background:var(--beige); cursor:pointer;
+  transition:all .15s; flex-shrink:0;
+}
+.rag-btn.rag-r { background:#f5c6c0; border-color:#e8a39a; }
+.rag-btn.rag-y { background:#f5e3b3; border-color:#e8cd7a; }
+.rag-btn.rag-g { background:#bce3c9; border-color:#8fcfa4; }
+.rag-btn.rag-r.sel { background:#c0392b; border-color:#c0392b; box-shadow:0 0 0 3px rgba(192,57,43,0.25); transform:scale(1.1); }
+.rag-btn.rag-y.sel { background:#d4a017; border-color:#d4a017; box-shadow:0 0 0 3px rgba(212,160,23,0.25); transform:scale(1.1); }
+.rag-btn.rag-g.sel { background:#1e8449; border-color:#1e8449; box-shadow:0 0 0 3px rgba(30,132,73,0.25); transform:scale(1.1); }
+
+.w-day-card {
+  background:#fff; border:1px solid var(--border); border-radius:11px;
+  margin-bottom:8px; overflow:hidden;
+}
+.w-day-top {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:9px 14px; background:var(--beige); border-bottom:1px solid var(--border);
+}
+.w-day-date { font-size:13px; font-style:italic; color:var(--navy); font-weight:700; }
+.w-day-session { font-size:11px; color:var(--text3); }
+.w-day-dots { display:flex; gap:5px; padding:8px 14px; flex-wrap:wrap; }
+.w-dot { width:13px; height:13px; border-radius:50%; flex-shrink:0; }
+.w-dot-r { background:#c0392b; } .w-dot-y { background:#d4a017; } .w-dot-g { background:#1e8449; }
+.w-dot-label { font-size:9px; color:var(--text3); margin-right:2px; align-self:center; }
+
+.w-manage-row {
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:10px 14px; border-bottom:1px solid var(--border);
+}
+.w-manage-row:last-child { border-bottom:none; }
+.w-manage-info { display:flex; flex-direction:column; gap:4px; }
+.w-manage-date { font-size:13px; font-weight:700; font-style:italic; color:var(--navy); }
+.w-manage-dots { display:flex; gap:4px; }
+.w-manage-actions { display:flex; gap:6px; flex-shrink:0; }
+.w-icon-btn {
+  width:32px; height:32px; border-radius:8px; border:1px solid var(--border2);
+  background:var(--beige); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:background .15s;
+}
+.w-icon-btn:hover { background:var(--sky); }
+.w-icon-btn.danger { border-color:#f8d7d7; background:#fff0f0; }
+.w-icon-btn.danger:hover { background:#fde0e0; }
 </style>
 </head>
 <body>
@@ -566,6 +625,9 @@ body::before {
     </button>
     <button class="sb-item" onclick="nav('distances')">
       <i class="ti ti-ruler"></i><span>Дистанции</span>
+    </button>
+    <button class="sb-item" onclick="nav('wellness')">
+      <i class="ti ti-mood-smile"></i><span>Wellness</span>
     </button>
   </div>
   <div class="sb-footer">© 2025 · Aqua Pro</div>
@@ -768,6 +830,110 @@ body::before {
 
 </div>
 
+  <!-- VIEW: WELLNESS -->
+  <div class="view" id="view-wellness">
+    <div class="sh"><h2>Wellness</h2><span>дневен чек на състоянието</span></div>
+
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-clipboard-check"></i>Нов запис</div>
+      <div class="card-body">
+        <div class="g3">
+          <div class="field">
+            <label>Дете</label>
+            <select id="w-child"><option value="">— избери —</option></select>
+          </div>
+          <div class="field">
+            <label>Дата</label>
+            <input type="date" id="w-date">
+          </div>
+          <div class="field">
+            <label>Сесия</label>
+            <select id="w-session">
+              <option value="morning">Сутрин</option>
+              <option value="afternoon">Следобед</option>
+              <option value="single">Единична</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="wellness-row" data-key="energy">
+          <span class="wellness-label">Енергия / Умора</span>
+          <div class="wellness-rag">
+            <button class="rag-btn rag-r" onclick="setRag(this,'energy')"></button>
+            <button class="rag-btn rag-y" onclick="setRag(this,'energy')"></button>
+            <button class="rag-btn rag-g" onclick="setRag(this,'energy')"></button>
+          </div>
+        </div>
+        <div class="wellness-row" data-key="compliance">
+          <span class="wellness-label">Следва инструкции</span>
+          <div class="wellness-rag">
+            <button class="rag-btn rag-r" onclick="setRag(this,'compliance')"></button>
+            <button class="rag-btn rag-y" onclick="setRag(this,'compliance')"></button>
+            <button class="rag-btn rag-g" onclick="setRag(this,'compliance')"></button>
+          </div>
+        </div>
+        <div class="wellness-row" data-key="complaints">
+          <span class="wellness-label">Оплаквания</span>
+          <div class="wellness-rag">
+            <button class="rag-btn rag-r" onclick="setRag(this,'complaints')"></button>
+            <button class="rag-btn rag-y" onclick="setRag(this,'complaints')"></button>
+            <button class="rag-btn rag-g" onclick="setRag(this,'complaints')"></button>
+          </div>
+        </div>
+        <div class="wellness-row" data-key="focus">
+          <span class="wellness-label">Концентрация / Фокус</span>
+          <div class="wellness-rag">
+            <button class="rag-btn rag-r" onclick="setRag(this,'focus')"></button>
+            <button class="rag-btn rag-y" onclick="setRag(this,'focus')"></button>
+            <button class="rag-btn rag-g" onclick="setRag(this,'focus')"></button>
+          </div>
+        </div>
+
+        <button class="btn-main" id="w-save-btn" onclick="saveWellness()">
+          <i class="ti ti-check"></i>Запази запис
+        </button>
+        <button class="btn-cancel" id="w-cancel-edit" style="display:none;width:100%;margin-top:8px;padding:12px" onclick="cancelWellnessEdit()">
+          Отказ на редакция
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-list-details"></i>Минали записи</div>
+      <div class="card-body">
+        <div class="field" style="margin-bottom:10px">
+          <label>Дете</label>
+          <select id="wm-child" onchange="loadWellnessManage()"><option value="">— избери —</option></select>
+        </div>
+        <div id="wellness-manage-list"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-chart-dots"></i>Анализ</div>
+      <div class="card-body">
+        <div class="g2">
+          <div class="field">
+            <label>Дете</label>
+            <select id="wa-child" onchange="loadWellnessAnalysis()"><option value="">— избери —</option></select>
+          </div>
+          <div class="field">
+            <label>Изглед</label>
+            <select id="wa-mode" onchange="loadWellnessAnalysis()">
+              <option value="overview">Общ изглед (всички)</option>
+              <option value="energy">Енергия / Умора</option>
+              <option value="compliance">Следва инструкции</option>
+              <option value="complaints">Оплаквания</option>
+              <option value="focus">Концентрация / Фокус</option>
+            </select>
+          </div>
+        </div>
+        <div id="wellness-chart-wrap" style="margin-top:10px"></div>
+        <div id="wellness-table-wrap" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- VIEW: DISTANCES -->
   <div class="view" id="view-distances">
     <div class="sh"><h2>Дистанции</h2><span>управление</span></div>
@@ -860,7 +1026,7 @@ let _db=null;
 
 const PCTS=[0.97,0.95,0.92,0.90,0.89,0.88,0.86,0.80,0.75];
 const PCOL={0.97:'#9b0000',0.95:'#bf2200',0.92:'#d44000',0.90:'#c86000',
-            0.89:'#c08000',0.88:'#a89200',0.86:'#809800',0.80:'#3a9400',0.75:'#007a40'};
+            0.89:'#c08000',0.88:'#a89200',0.86:'#809800',0.85:'#5a9200',0.80:'#3a9400',0.75:'#007a40'};
 const SLB={crawl:'Кроул',back:'Гръб',fly:'Делфин',breast:'Бруст'};
 
 let DISTS = {
@@ -871,8 +1037,8 @@ let DISTS = {
 };
 let curChild=null,cData=[],charts={};
 let activeDistTab='crawl';
-const VIEWS=['enter','all','history','delete','children','distances'];
-const VT={enter:'Въведи темпо',all:'Всички деца',history:'История',delete:'Изтриване',children:'Управление на деца',distances:'Дистанции'};
+const VIEWS=['enter','all','history','delete','children','distances','wellness'];
+const VT={enter:'Въведи темпо',all:'Всички деца',history:'История',delete:'Изтриване',children:'Управление на деца',distances:'Дистанции',wellness:'Wellness'};
 
 function getDists(s){return DISTS[s]||[50,100,200,400];}
 function fillDists(id,style){
@@ -912,6 +1078,7 @@ function nav(v){
   if(v==='delete')loadDelList();
   if(v==='children')loadChildrenMgmt();
   if(v==='distances')renderDistMgmt();
+  if(v==='wellness')initWellness();
 }
 
 function calcAndSave(){
@@ -1174,204 +1341,241 @@ async function confirmDelete(){
 fillDists('e-dist','crawl');
 fillDists('a-dist','crawl');
 
-// ── INIT SUPABASE CLIENT ──
-(function() {
-  try {
-    const { createClient } = window.supabase;
-    _db = createClient(SUPABASE_URL, SUPABASE_KEY);
-    console.log('Supabase client ready');
-  } catch(e) { console.log('Supabase client error', e); }
-})();
+// ── WELLNESS ──
+const WCRITERIA = ['energy','compliance','complaints','focus'];
+const WLABELS = {energy:'Енергия',compliance:'Дисциплина',complaints:'Оплаквания',focus:'Фокус'};
+const RAG_VAL = {r:1, y:2, g:3};
+const RAG_COLOR = {1:'#c0392b', 2:'#d4a017', 3:'#1e8449'};
+let wellnessData = {};
+let editingWellnessId = null;
 
-// Override fetch functions to use Supabase JS client
-async function sbSelect(table, filters) {
-  if (!_db) return null;
-  let q = _db.from(table).select('*');
-  if (filters) Object.entries(filters).forEach(([k,v]) => { q = q.eq(k, v); });
-  const { data, error } = await q;
-  if (error) throw error;
-  return data;
-}
-async function sbInsert(table, row) {
-  if (!_db) return null;
-  const { error } = await _db.from(table).insert(row);
-  if (error) throw error;
-  return true;
-}
-async function sbDelete(table, filters) {
-  if (!_db) return null;
-  let q = _db.from(table).delete();
-  Object.entries(filters).forEach(([k,v]) => { q = q.eq(k, v); });
-  const { error } = await q;
-  if (error) throw error;
-  return true;
+async function waitForDb(maxTries) {
+  let tries = 0;
+  while (!_db && tries < (maxTries||20)) {
+    await new Promise(r => setTimeout(r, 150));
+    tries++;
+  }
+  return !!_db;
 }
 
-// ── CHILDREN MANAGEMENT ──
-let childrenList = [];
-
-async function loadChildrenMgmt() {
+async function initWellness() {
+  const ready = await waitForDb();
+  if (!ready) { toast('Supabase не е готов, презареди страницата', true); return; }
   await fetchChildrenFromDB();
-  renderChildrenMgmt();
-}
-
-async function fetchChildrenFromDB() {
-  try {
-    const { data: d, error: ec } = await _db.from('swimmers').select('*').order('name');
-    if (ec) return;
-    if (Array.isArray(d)) {
-      childrenList = d.map(x => x.name);
-      refreshAllDropdowns();
-    }
-  } catch(e) { console.log('swimmers table not ready', e); }
-}
-
-function refreshAllDropdowns() {
-  ['e-child'].forEach(id => {
+  ['w-child','wa-child','wm-child'].forEach(id => {
     const sel = document.getElementById(id);
-    if (!sel) return;
     const cur = sel.value;
     sel.innerHTML = '<option value="">— избери —</option>' +
       childrenList.map(n => `<option${n===cur?' selected':''}>${n}</option>`).join('');
   });
+  cancelWellnessEdit();
+  document.getElementById('w-date').value = new Date().toISOString().split('T')[0];
 }
 
-function renderChildrenMgmt() {
-  const el = document.getElementById('children-list');
-  if (!childrenList.length) {
-    el.innerHTML = '<div class="empty" style="padding:20px"><i class="ti ti-mood-empty"></i><span>Няма деца</span></div>';
-    return;
-  }
-  el.innerHTML = childrenList.map((n,i) => `
-    <div style="display:flex;align-items:center;justify-content:space-between;
-      padding:11px 16px;border-bottom:${i<childrenList.length-1?'1px solid var(--border)':'none'}">
-      <span style="font-size:15px;font-style:italic;color:var(--text)">${n}</span>
-      <button onclick="removeChild('${n}')"
-        style="width:34px;height:34px;border-radius:9px;border:1px solid #f8d7d7;
-        background:#fff0f0;cursor:pointer;display:flex;align-items:center;justify-content:center;
-        transition:background .15s" onmouseover="this.style.background='#fde0e0'" onmouseout="this.style.background='#fff0f0'">
-        <i class="ti ti-x" style="font-size:16px;color:#c0392b"></i>
-      </button>
-    </div>`).join('');
+function setRag(btn, key) {
+  const row = btn.closest('.wellness-row');
+  row.querySelectorAll('.rag-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const cls = btn.className.match(/rag-([ryg])/)[1];
+  wellnessData[key] = cls;
 }
 
-async function addChild() {
-  const input = document.getElementById('new-child-name');
-  const name = input.value.trim();
-  if (!name) { toast('Въведи име!', true); return; }
-  if (childrenList.includes(name)) { toast('Детето вече е в списъка!', true); return; }
+function cancelWellnessEdit() {
+  editingWellnessId = null;
+  wellnessData = {};
+  document.querySelectorAll('.rag-btn').forEach(b => b.classList.remove('sel'));
+  document.getElementById('w-save-btn').innerHTML = '<i class="ti ti-check"></i>Запази запис';
+  document.getElementById('w-cancel-edit').style.display = 'none';
+}
+
+async function saveWellness() {
+  const child = document.getElementById('w-child').value;
+  const date = document.getElementById('w-date').value;
+  const session = document.getElementById('w-session').value;
+  if (!child) { toast('Избери дете!', true); return; }
+  if (!date) { toast('Избери дата!', true); return; }
+  const missing = WCRITERIA.filter(k => !wellnessData[k]);
+  if (missing.length) { toast('Попълни всички критерии!', true); return; }
+
+  const row = { child_name: child, entry_date: date, session: session };
+  WCRITERIA.forEach(k => { row[k] = RAG_VAL[wellnessData[k]]; });
+
   try {
-    const { error: ea } = await _db.from('swimmers').insert({name});
-    if (ea) { toast('Грешка при запис', true); return; }
-  } catch(e) { toast('Грешка при запис', true); return; }
-  childrenList.push(name);
-  childrenList.sort((a,b) => a.localeCompare(b,'bg'));
-  refreshAllDropdowns();
-  renderChildrenMgmt();
-  input.value = '';
-  toast(name + ' е добавено');
-}
-
-async function removeChild(name) {
-  try {
-    const { error: ed } = await _db.from('swimmers').delete().eq('name',name);
-    if (ed) { toast('Грешка при изтриване', true); return; }
-  } catch(e) { toast('Грешка при изтриване', true); return; }
-  childrenList = childrenList.filter(n => n !== name);
-  refreshAllDropdowns();
-  renderChildrenMgmt();
-  toast(name + ' е премахнато');
-}
-
-// Initialize on load
-setTimeout(fetchChildrenFromDB, 300);
-
-// ── DISTANCES MANAGEMENT ──
-async function fetchDistsFromDB() {
-  try {
-    const { data: d, error: efd } = await _db.from('distances').select('*').order('stroke').order('meters');
-    if (efd) return;
-    if (Array.isArray(d) && d.length > 0) {
-      DISTS = {crawl:[],back:[],fly:[],breast:[]};
-      d.forEach(row => {
-        if (DISTS[row.stroke]) DISTS[row.stroke].push(row.meters);
-      });
-      fillDists('e-dist', document.getElementById('e-style').value);
-      fillDists('a-dist', document.getElementById('a-style').value);
+    if (editingWellnessId) {
+      const { error } = await _db.from('wellness_logs').update(row).eq('id', editingWellnessId);
+      if (error) { toast('Грешка при запис', true); console.log(error); return; }
+      toast('Записът е обновен');
+    } else {
+      const { error } = await _db.from('wellness_logs').upsert(row, {onConflict: 'child_name,entry_date,session'});
+      if (error) { toast('Грешка при запис', true); console.log(error); return; }
+      toast('Записът е запазен');
     }
-  } catch(e) { console.log('distances table not ready', e); }
+    cancelWellnessEdit();
+    if (document.getElementById('wm-child').value === child) loadWellnessManage();
+    if (document.getElementById('wa-child').value === child) loadWellnessAnalysis();
+  } catch(e) { toast('Грешка при запис', true); }
 }
 
-async function renderDistMgmt() {
-  await fetchDistsFromDB();
-  renderDistList(activeDistTab);
+async function loadWellnessManage() {
+  const child = document.getElementById('wm-child').value;
+  const el = document.getElementById('wellness-manage-list');
+  if (!child) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="empty" style="padding:20px"><i class="ti ti-loader"></i><span>Зареждане…</span></div>';
+
+  try {
+    const { data, error } = await _db.from('wellness_logs')
+      .select('*').eq('child_name', child)
+      .order('entry_date', {ascending:false}).order('session');
+    if (error) throw error;
+    if (!data || !data.length) {
+      el.innerHTML = '<div class="empty" style="padding:20px"><i class="ti ti-mood-empty"></i><span>Няма записи</span></div>';
+      return;
+    }
+    const sessLabel = {morning:'Сутрин',afternoon:'Следобед',single:'Единична'};
+    el.innerHTML = data.map(r => {
+      const date = new Date(r.entry_date).toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit',year:'numeric'});
+      return `<div class="w-manage-row">
+        <div class="w-manage-info">
+          <span class="w-manage-date">${date} · ${sessLabel[r.session]||''}</span>
+          <div class="w-manage-dots">
+            ${WCRITERIA.map(k => `<span class="w-dot ${r[k]===1?'w-dot-r':r[k]===2?'w-dot-y':'w-dot-g'}"></span>`).join('')}
+          </div>
+        </div>
+        <div class="w-manage-actions">
+          <button class="w-icon-btn" onclick='editWellness(${JSON.stringify(r)})'>
+            <i class="ti ti-pencil" style="font-size:15px;color:var(--navy)"></i>
+          </button>
+          <button class="w-icon-btn danger" onclick="deleteWellness(${r.id},'${child}')">
+            <i class="ti ti-trash" style="font-size:15px;color:#c0392b"></i>
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i><span>Грешка</span></div>'; }
 }
 
-function selectDistTab(style, btn) {
-  activeDistTab = style;
-  document.querySelectorAll('.dist-style-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('dist-style-sel').value = style;
-  renderDistList(style);
+function editWellness(r) {
+  document.getElementById('w-child').value = r.child_name;
+  document.getElementById('w-date').value = r.entry_date;
+  document.getElementById('w-session').value = r.session;
+  wellnessData = {};
+  document.querySelectorAll('.rag-btn').forEach(b => b.classList.remove('sel'));
+  WCRITERIA.forEach(k => {
+    const v = r[k];
+    const cls = v===1?'rag-r':v===2?'rag-y':'rag-g';
+    wellnessData[k] = v===1?'r':v===2?'y':'g';
+    const row = document.querySelector(`.wellness-row[data-key="${k}"]`);
+    if (row) {
+      const btn = row.querySelector('.' + cls);
+      if (btn) btn.classList.add('sel');
+    }
+  });
+  editingWellnessId = r.id;
+  document.getElementById('w-save-btn').innerHTML = '<i class="ti ti-check"></i>Обнови запис';
+  document.getElementById('w-cancel-edit').style.display = 'block';
+  document.getElementById('view-wellness').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
-function renderDistList(style) {
-  const el = document.getElementById('dist-list');
-  const dists = DISTS[style] || [];
-  if (!dists.length) {
-    el.innerHTML = '<div class="empty" style="padding:20px"><i class="ti ti-mood-empty"></i><span>Няма дистанции</span></div>';
+async function deleteWellness(id, child) {
+  try {
+    const { error } = await _db.from('wellness_logs').delete().eq('id', id);
+    if (error) { toast('Грешка при изтриване', true); return; }
+    toast('Записът е изтрит');
+    loadWellnessManage();
+    if (document.getElementById('wa-child').value === child) loadWellnessAnalysis();
+  } catch(e) { toast('Грешка при изтриване', true); }
+}
+
+async function loadWellnessAnalysis() {
+  const child = document.getElementById('wa-child').value;
+  const mode = document.getElementById('wa-mode').value;
+  const chartEl = document.getElementById('wellness-chart-wrap');
+  const tableEl = document.getElementById('wellness-table-wrap');
+  if (!child) { chartEl.innerHTML=''; tableEl.innerHTML=''; return; }
+
+  chartEl.innerHTML = '<div class="empty" style="padding:24px"><i class="ti ti-loader"></i><span>Зареждане…</span></div>';
+  tableEl.innerHTML = '';
+
+  let data;
+  try {
+    const { data: d, error } = await _db.from('wellness_logs')
+      .select('*').eq('child_name', child)
+      .order('entry_date').order('session');
+    if (error) throw error;
+    data = d;
+  } catch(e) { chartEl.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i><span>Грешка</span></div>'; return; }
+
+  if (!data || !data.length) {
+    chartEl.innerHTML = '<div class="empty"><i class="ti ti-mood-empty"></i><span>Няма записи</span></div>';
     return;
   }
-  el.innerHTML = dists.map((d,i) => `
-    <div style="display:flex;align-items:center;justify-content:space-between;
-      padding:11px 16px;border-bottom:${i<dists.length-1?'1px solid var(--border)':'none'}">
-      <span style="font-size:16px;font-weight:700;color:var(--navy);font-family:Cambria,Georgia,serif">${d}<span style="font-size:12px;font-weight:400;font-style:italic;color:var(--text3);margin-left:3px">м</span></span>
-      <button onclick="removeDist('${style}',${d})"
-        style="width:34px;height:34px;border-radius:9px;border:1px solid #f8d7d7;
-        background:#fff0f0;cursor:pointer;display:flex;align-items:center;justify-content:center;
-        transition:background .15s" onmouseover="this.style.background='#fde0e0'" onmouseout="this.style.background='#fff0f0'">
-        <i class="ti ti-x" style="font-size:16px;color:#c0392b"></i>
-      </button>
-    </div>`).join('');
-}
 
-async function addDist() {
-  const style = document.getElementById('dist-style-sel').value;
-  const val = parseInt(document.getElementById('new-dist-val').value);
-  if (!val || val < 1) { toast('Въведи валидни метри!', true); return; }
-  if (DISTS[style].includes(val)) { toast('Дистанцията вече съществува!', true); return; }
-  try {
-    const { error: ead } = await _db.from('distances').insert({stroke: style, meters: val});
-    if (ead) { toast('Грешка при запис', true); return; }
-  } catch(e) { toast('Грешка при запис', true); return; }
-  DISTS[style].push(val);
-  DISTS[style].sort((a,b) => a-b);
-  fillDists('e-dist', document.getElementById('e-style').value);
-  fillDists('a-dist', document.getElementById('a-style').value);
-  activeDistTab = style;
-  document.querySelectorAll('.dist-style-tab').forEach((b,i) => {
-    b.classList.toggle('active', ['crawl','back','fly','breast'][i] === style);
+  const sessLabel = {morning:'Сутрин',afternoon:'Следобед',single:'Единична'};
+  const labels = data.map(r => new Date(r.entry_date).toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit'}) + ' ' + (sessLabel[r.session]||''));
+
+  if (window._wChart) { window._wChart.destroy(); }
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'max-height:220px;width:100%';
+  chartEl.innerHTML = '';
+  chartEl.appendChild(canvas);
+
+  let datasets;
+  if (mode === 'overview') {
+    datasets = WCRITERIA.map((k, i) => {
+      const colors = ['#1a56db','#8b6914','#c49a2a','#0d2b52'];
+      return {
+        label: WLABELS[k],
+        data: data.map(r => r[k]),
+        borderColor: colors[i],
+        backgroundColor: 'transparent',
+        tension: .3, borderWidth: 2, pointRadius: 3
+      };
+    });
+  } else {
+    datasets = [{
+      label: WLABELS[mode],
+      data: data.map(r => r[mode]),
+      borderColor: '#1a56db',
+      backgroundColor: 'rgba(26,86,219,0.08)',
+      fill: true, tension: .3, borderWidth: 2, pointRadius: 4,
+      pointBackgroundColor: data.map(r => RAG_COLOR[r[mode]])
+    }];
+  }
+
+  window._wChart = new Chart(canvas, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: mode==='overview', position:'bottom', labels:{font:{size:10,family:'Cambria'}} } },
+      scales: {
+        y: { min:0.5, max:3.5, ticks: { stepSize:1, callback: v => v===1?'Червено':v===2?'Жълто':v===3?'Зелено':'', font:{size:10,family:'Cambria'} }, grid:{color:'rgba(0,0,0,0.04)'} },
+        x: { ticks: { font:{size:9,family:'Cambria'} }, grid:{color:'rgba(0,0,0,0.04)'} }
+      }
+    }
   });
-  renderDistList(style);
-  document.getElementById('new-dist-val').value = '';
-  toast(val + 'м добавено за ' + SLB[style]);
+
+  let html = '';
+  data.slice().reverse().forEach(r => {
+    const date = new Date(r.entry_date).toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit',year:'numeric'});
+    html += `<div class="w-day-card">
+      <div class="w-day-top">
+        <span class="w-day-date">${date}</span>
+        <span class="w-day-session">${sessLabel[r.session]||''}</span>
+      </div>
+      <div class="w-day-dots">
+        ${WCRITERIA.map(k => {
+          const v = r[k];
+          const dotCls = v===1?'w-dot-r':v===2?'w-dot-y':'w-dot-g';
+          return `<span class="w-dot-label">${WLABELS[k]}</span><span class="w-dot ${dotCls}"></span>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+  tableEl.innerHTML = html;
 }
 
-async function removeDist(style, val) {
-  if (DISTS[style].length <= 1) { toast('Трябва поне една дистанция!', true); return; }
-  try {
-    const { error: erd } = await _db.from('distances').delete().eq('stroke',style).eq('meters',val);
-    if (erd) { toast('Грешка при изтриване', true); return; }
-  } catch(e) { toast('Грешка при изтриване', true); return; }
-  DISTS[style] = DISTS[style].filter(d => d !== val);
-  fillDists('e-dist', document.getElementById('e-style').value);
-  fillDists('a-dist', document.getElementById('a-style').value);
-  renderDistList(style);
-  toast(val + 'м е премахнато');
-}
 
-// Load distances on start
-setTimeout(fetchDistsFromDB, 300);
 </script>
 </body>
 </html>
