@@ -1941,6 +1941,10 @@ function renderSetCards(existing) {
             <input type="text" id="set-${n}-mode" placeholder="@01:30" value="${data?.mode||''}">
           </div>
         </div>
+        <div class="field" style="margin-bottom:8px">
+          <label>Почивка</label>
+          <input type="text" id="set-${n}-rest" placeholder="напр. 30 сек" value="${data?.rest||''}">
+        </div>
         <div class="g2">
           <div class="field" style="margin-bottom:8px">
             <label>Очакван лактат</label>
@@ -1996,11 +2000,12 @@ async function saveWorkout() {
     const reps = document.getElementById(`set-${n}-reps`).value;
     const dist = document.getElementById(`set-${n}-dist`).value;
     const mode = document.getElementById(`set-${n}-mode`).value;
+    const rest = document.getElementById(`set-${n}-rest`).value;
     const lacExp = document.getElementById(`set-${n}-lac-exp`).value;
     const lacAct = document.getElementById(`set-${n}-lac-act`).value;
     const times = document.getElementById(`set-${n}-times`).value;
-    if (reps || dist || mode || lacExp || lacAct || times) {
-      sets.push({n, reps: parseInt(reps)||null, dist: parseInt(dist)||null, mode, lac_exp: lacExp, lac_act: lacAct, times});
+    if (reps || dist || mode || rest || lacExp || lacAct || times) {
+      sets.push({n, reps: parseInt(reps)||null, dist: parseInt(dist)||null, mode, rest, lac_exp: lacExp, lac_act: lacAct, times});
     }
   });
 
@@ -2079,7 +2084,7 @@ async function loadWorkoutsList() {
         </div>
         <div class="workout-body">
           ${sets.map(s => `<div class="workout-set">
-            <div class="workout-set-title">Сет ${s.n}: ${s.reps||'-'}×${s.dist||'-'}м ${s.mode?('· '+s.mode):''}</div>
+            <div class="workout-set-title">Сет ${s.n}: ${s.reps||'-'}×${s.dist||'-'}м ${s.mode?('· '+s.mode):''}${s.rest?(' · почивка '+s.rest):''}</div>
             <div class="workout-set-grid">
               <div>Очакван лактат: ${s.lac_exp||'-'}</div>
               <div>Измерен лактат: ${s.lac_act||'-'}</div>
