@@ -593,6 +593,60 @@ body::before {
 .w-icon-btn:hover { background:var(--sky); }
 .w-icon-btn.danger { border-color:#f8d7d7; background:#fff0f0; }
 .w-icon-btn.danger:hover { background:#fde0e0; }
+/* ── WORKOUTS ── */
+.session-btn {
+  padding:11px; border-radius:10px; border:1.5px solid var(--border2);
+  background:var(--beige); cursor:pointer;
+  font-family:Cambria,Georgia,serif; font-size:14px; font-style:italic;
+  color:var(--text2); transition:all .18s;
+}
+.session-btn.sel { background:var(--navy); color:#fff; border-color:var(--navy); }
+
+.set-card {
+  background:var(--beige); border:1px solid var(--border2);
+  border-radius:12px; padding:14px; margin-top:12px;
+}
+.set-card-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:10px;
+}
+.set-card-title {
+  font-size:13px; font-weight:700; font-style:italic; color:var(--navy);
+}
+.set-toggle {
+  font-size:12px; color:var(--blue); cursor:pointer; font-style:italic;
+  background:none; border:none; padding:0;
+}
+
+.wk-wellness-box {
+  background:var(--sky); border:1px solid var(--sky2);
+  border-radius:10px; padding:10px 14px; margin-bottom:12px;
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+.wk-wellness-box .wlabel { font-size:11px; font-style:italic; color:var(--text2); }
+.wk-wellness-box .wdots { display:flex; gap:8px; align-items:center; flex:1; flex-wrap:wrap; }
+.wk-wellness-empty { font-size:12px; font-style:italic; color:var(--text3); }
+
+.workout-card {
+  background:#fff; border:1px solid var(--border); border-radius:12px;
+  margin-bottom:10px; overflow:hidden;
+}
+.workout-top {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 14px; background:var(--beige); border-bottom:1px solid var(--border);
+}
+.workout-date { font-size:14px; font-weight:700; font-style:italic; color:var(--navy); }
+.workout-meta { font-size:11px; color:var(--text3); }
+.workout-actions { display:flex; gap:6px; }
+.workout-body { padding:10px 14px; }
+.workout-set {
+  border-bottom:1px solid var(--border); padding:8px 0;
+  font-size:12px; color:var(--text2);
+}
+.workout-set:last-child { border-bottom:none; }
+.workout-set-title { font-weight:700; color:var(--navy); font-style:italic; margin-bottom:3px; }
+.workout-set-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px; font-size:11px; color:var(--text3); }
+.workout-notes { font-size:12px; font-style:italic; color:var(--text2); margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); }
 </style>
 </head>
 <body>
@@ -608,13 +662,13 @@ body::before {
   </div>
   <div class="sb-nav">
     <div class="sb-lbl">Основно</div>
-    <button class="sb-item active" onclick="nav('enter')">
+    <button class="sb-item" onclick="nav('enter')">
       <i class="ti ti-calculator"></i><span>Въведи темпо</span>
     </button>
     <button class="sb-item" onclick="nav('all')">
       <i class="ti ti-users"></i><span>Всички деца</span>
     </button>
-    <button class="sb-item" onclick="nav('history')">
+    <button class="sb-item active" onclick="nav('history')">
       <i class="ti ti-chart-line"></i><span>История</span>
     </button>
     <button class="sb-item" onclick="nav('delete')">
@@ -629,6 +683,9 @@ body::before {
     <button class="sb-item" onclick="nav('wellness')">
       <i class="ti ti-mood-smile"></i><span>Wellness</span>
     </button>
+    <button class="sb-item" onclick="nav('workouts')">
+      <i class="ti ti-clipboard-list"></i><span>Плувани серии</span>
+    </button>
   </div>
   <div class="sb-footer">© 2025 · Aqua Pro</div>
 </nav>
@@ -638,14 +695,14 @@ body::before {
   <button class="menu-btn" onclick="openSidebar()">
     <i class="ti ti-menu-2"></i>
   </button>
-  <span class="tb-title" id="tb-title">Въведи темпо</span>
+  <span class="tb-title" id="tb-title">История</span>
   <span class="tb-pill" id="tb-pill">25М</span>
 </div>
 
 <div id="main">
 
   <!-- VIEW: ENTER -->
-  <div class="view active" id="view-enter">
+  <div class="view" id="view-enter">
     <div class="sh"><h2>Темпо</h2><span>въведи резултат</span></div>
 
     <div class="card">
@@ -745,7 +802,7 @@ body::before {
   </div>
 
   <!-- VIEW: HISTORY -->
-  <div class="view" id="view-history">
+  <div class="view active" id="view-history">
     <div class="sh"><h2>История</h2><span>прогрес по дете</span></div>
     <div id="hist-list">
       <div class="card">
@@ -934,6 +991,64 @@ body::before {
     </div>
   </div>
 
+  <!-- VIEW: WORKOUTS -->
+  <div class="view" id="view-workouts">
+    <div class="sh"><h2>Плувани серии</h2><span>дневник на тренировки</span></div>
+
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-clipboard-plus"></i>Нов запис</div>
+      <div class="card-body">
+        <div class="g3">
+          <div class="field">
+            <label>Дете</label>
+            <select id="wk-child"><option value="">— избери —</option></select>
+          </div>
+          <div class="field">
+            <label>Дата</label>
+            <input type="date" id="wk-date">
+          </div>
+          <div class="field">
+            <label>Басейн</label>
+            <select id="wk-pool">
+              <option value="25">25м</option>
+              <option value="50">50м</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Време</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <button class="session-btn sel" data-session="morning" onclick="selectSession(this)">Сутрин</button>
+            <button class="session-btn" data-session="afternoon" onclick="selectSession(this)">Следобед</button>
+          </div>
+        </div>
+
+        <!-- wellness preview -->
+        <div id="wk-wellness-preview"></div>
+
+        <div id="wk-sets"></div>
+
+        <button class="btn-main" onclick="saveWorkout()">
+          <i class="ti ti-check"></i>Запази тренировка
+        </button>
+        <button class="btn-cancel" id="wk-cancel-edit" style="display:none;width:100%;margin-top:8px;padding:12px" onclick="cancelWorkoutEdit()">
+          Отказ на редакция
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-list-details"></i>Записани тренировки</div>
+      <div class="card-body">
+        <div class="field" style="margin-bottom:10px">
+          <label>Дете</label>
+          <select id="wkm-child" onchange="loadWorkoutsList()"><option value="">— избери —</option></select>
+        </div>
+        <div id="workouts-list"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- VIEW: DISTANCES -->
   <div class="view" id="view-distances">
     <div class="sh"><h2>Дистанции</h2><span>управление</span></div>
@@ -1037,8 +1152,8 @@ let DISTS = {
 };
 let curChild=null,cData=[],charts={};
 let activeDistTab='crawl';
-const VIEWS=['enter','all','history','delete','children','distances','wellness'];
-const VT={enter:'Въведи темпо',all:'Всички деца',history:'История',delete:'Изтриване',children:'Управление на деца',distances:'Дистанции',wellness:'Wellness'};
+const VIEWS=['enter','all','history','delete','children','distances','wellness','workouts'];
+const VT={enter:'Въведи темпо',all:'Всички деца',history:'История',delete:'Изтриване',children:'Управление на деца',distances:'Дистанции',wellness:'Wellness',workouts:'Плувани серии'};
 
 function getDists(s){return DISTS[s]||[50,100,200,400];}
 function fillDists(id,style){
@@ -1079,6 +1194,7 @@ function nav(v){
   if(v==='children')loadChildrenMgmt();
   if(v==='distances')renderDistMgmt();
   if(v==='wellness')initWellness();
+  if(v==='workouts')initWorkouts();
 }
 
 function calcAndSave(){
@@ -1338,8 +1454,173 @@ async function confirmDelete(){
   }catch(e){ toast('Грешка при изтриване',true); }
 }
 
+// ── CHILDREN MANAGEMENT ──
+let childrenList = [];
+
+async function loadChildrenMgmt() {
+  await fetchChildrenFromDB();
+  renderChildrenMgmt();
+}
+
+async function fetchChildrenFromDB() {
+  try {
+    const { data: d, error: ec } = await _db.from('swimmers').select('*').order('name');
+    if (ec) return;
+    if (Array.isArray(d)) {
+      childrenList = d.map(x => x.name);
+      refreshAllDropdowns();
+    }
+  } catch(e) { console.log('swimmers table not ready', e); }
+}
+
+function refreshAllDropdowns() {
+  ['e-child'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— избери —</option>' +
+      childrenList.map(n => `<option${n===cur?' selected':''}>${n}</option>`).join('');
+  });
+}
+
+function renderChildrenMgmt() {
+  const el = document.getElementById('children-list');
+  if (!el) return;
+  if (!childrenList.length) {
+    el.innerHTML = '<div class="empty" style="padding:20px"><i class="ti ti-mood-empty"></i><span>Няма деца</span></div>';
+    return;
+  }
+  el.innerHTML = childrenList.map((n,i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;
+      padding:11px 16px;border-bottom:${i<childrenList.length-1?'1px solid var(--border)':'none'}">
+      <span style="font-size:15px;font-style:italic;color:var(--text)">${n}</span>
+      <button onclick="removeChild('${n}')"
+        style="width:34px;height:34px;border-radius:9px;border:1px solid #f8d7d7;
+        background:#fff0f0;cursor:pointer;display:flex;align-items:center;justify-content:center;
+        transition:background .15s" onmouseover="this.style.background='#fde0e0'" onmouseout="this.style.background='#fff0f0'">
+        <i class="ti ti-x" style="font-size:16px;color:#c0392b"></i>
+      </button>
+    </div>`).join('');
+}
+
+async function addChild() {
+  const input = document.getElementById('new-child-name');
+  const name = input.value.trim();
+  if (!name) { toast('Въведи име!', true); return; }
+  if (childrenList.includes(name)) { toast('Детето вече е в списъка!', true); return; }
+  try {
+    const { error: ea } = await _db.from('swimmers').insert({name});
+    if (ea) { toast('Грешка при запис', true); return; }
+  } catch(e) { toast('Грешка при запис', true); return; }
+  childrenList.push(name);
+  childrenList.sort((a,b) => a.localeCompare(b,'bg'));
+  refreshAllDropdowns();
+  renderChildrenMgmt();
+  input.value = '';
+  toast(name + ' е добавено');
+}
+
+async function removeChild(name) {
+  try {
+    const { error: ed } = await _db.from('swimmers').delete().eq('name',name);
+    if (ed) { toast('Грешка при изтриване', true); return; }
+  } catch(e) { toast('Грешка при изтриване', true); return; }
+  childrenList = childrenList.filter(n => n !== name);
+  refreshAllDropdowns();
+  renderChildrenMgmt();
+  toast(name + ' е премахнато');
+}
+
+// ── DISTANCES MANAGEMENT ──
+async function fetchDistsFromDB() {
+  try {
+    const { data: d, error: efd } = await _db.from('distances').select('*').order('stroke').order('meters');
+    if (efd) return;
+    if (Array.isArray(d) && d.length > 0) {
+      DISTS = {crawl:[],back:[],fly:[],breast:[]};
+      d.forEach(row => {
+        if (DISTS[row.stroke]) DISTS[row.stroke].push(row.meters);
+      });
+      fillDists('e-dist', document.getElementById('e-style').value);
+      fillDists('a-dist', document.getElementById('a-style').value);
+    }
+  } catch(e) { console.log('distances table not ready', e); }
+}
+
+async function renderDistMgmt() {
+  await fetchDistsFromDB();
+  renderDistList(activeDistTab);
+}
+
+function selectDistTab(style, btn) {
+  activeDistTab = style;
+  document.querySelectorAll('.dist-style-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('dist-style-sel').value = style;
+  renderDistList(style);
+}
+
+function renderDistList(style) {
+  const el = document.getElementById('dist-list');
+  if (!el) return;
+  const dists = DISTS[style] || [];
+  if (!dists.length) {
+    el.innerHTML = '<div class="empty" style="padding:20px"><i class="ti ti-mood-empty"></i><span>Няма дистанции</span></div>';
+    return;
+  }
+  el.innerHTML = dists.map((d,i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;
+      padding:11px 16px;border-bottom:${i<dists.length-1?'1px solid var(--border)':'none'}">
+      <span style="font-size:16px;font-weight:700;color:var(--navy);font-family:Cambria,Georgia,serif">${d}<span style="font-size:12px;font-weight:400;font-style:italic;color:var(--text3);margin-left:3px">м</span></span>
+      <button onclick="removeDist('${style}',${d})"
+        style="width:34px;height:34px;border-radius:9px;border:1px solid #f8d7d7;
+        background:#fff0f0;cursor:pointer;display:flex;align-items:center;justify-content:center;
+        transition:background .15s" onmouseover="this.style.background='#fde0e0'" onmouseout="this.style.background='#fff0f0'">
+        <i class="ti ti-x" style="font-size:16px;color:#c0392b"></i>
+      </button>
+    </div>`).join('');
+}
+
+async function addDist() {
+  const style = document.getElementById('dist-style-sel').value;
+  const val = parseInt(document.getElementById('new-dist-val').value);
+  if (!val || val < 1) { toast('Въведи валидни метри!', true); return; }
+  if (DISTS[style].includes(val)) { toast('Дистанцията вече съществува!', true); return; }
+  try {
+    const { error: ead } = await _db.from('distances').insert({stroke: style, meters: val});
+    if (ead) { toast('Грешка при запис', true); return; }
+  } catch(e) { toast('Грешка при запис', true); return; }
+  DISTS[style].push(val);
+  DISTS[style].sort((a,b) => a-b);
+  fillDists('e-dist', document.getElementById('e-style').value);
+  fillDists('a-dist', document.getElementById('a-style').value);
+  activeDistTab = style;
+  document.querySelectorAll('.dist-style-tab').forEach((b,i) => {
+    b.classList.toggle('active', ['crawl','back','fly','breast'][i] === style);
+  });
+  renderDistList(style);
+  document.getElementById('new-dist-val').value = '';
+  toast(val + 'м добавено за ' + SLB[style]);
+}
+
+async function removeDist(style, val) {
+  if (DISTS[style].length <= 1) { toast('Трябва поне една дистанция!', true); return; }
+  try {
+    const { error: erd } = await _db.from('distances').delete().eq('stroke',style).eq('meters',val);
+    if (erd) { toast('Грешка при изтриване', true); return; }
+  } catch(e) { toast('Грешка при изтриване', true); return; }
+  DISTS[style] = DISTS[style].filter(d => d !== val);
+  fillDists('e-dist', document.getElementById('e-style').value);
+  fillDists('a-dist', document.getElementById('a-style').value);
+  renderDistList(style);
+  toast(val + 'м е премахнато');
+}
+
 fillDists('e-dist','crawl');
 fillDists('a-dist','crawl');
+setTimeout(loadHistList, 400);
+setTimeout(fetchChildrenFromDB, 300);
+setTimeout(fetchDistsFromDB, 300);
 
 // ── WELLNESS ──
 const WCRITERIA = ['energy','compliance','complaints','focus'];
@@ -1575,6 +1856,266 @@ async function loadWellnessAnalysis() {
   tableEl.innerHTML = html;
 }
 
+// ── WORKOUTS (Плувани серии) ──
+let editingWorkoutId = null;
+let currentWkSession = 'morning';
+
+function initWorkouts() {
+  ['wk-child','wkm-child'].forEach(id => {
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— избери —</option>' +
+      childrenList.map(n => `<option${n===cur?' selected':''}>${n}</option>`).join('');
+  });
+  document.getElementById('wk-date').value = new Date().toISOString().split('T')[0];
+  cancelWorkoutEdit();
+  renderSetCards();
+  loadWkWellnessPreview();
+}
+
+function selectSession(btn) {
+  document.querySelectorAll('.session-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  currentWkSession = btn.dataset.session;
+  loadWkWellnessPreview();
+}
+
+document.addEventListener('change', e => {
+  if (e.target.id === 'wk-child' || e.target.id === 'wk-date') loadWkWellnessPreview();
+});
+
+async function loadWkWellnessPreview() {
+  const child = document.getElementById('wk-child').value;
+  const date = document.getElementById('wk-date').value;
+  const el = document.getElementById('wk-wellness-preview');
+  if (!child || !date) { el.innerHTML = ''; return; }
+  try {
+    const { data, error } = await _db.from('wellness_logs')
+      .select('*').eq('child_name', child).eq('entry_date', date).eq('session', currentWkSession).maybeSingle();
+    if (error || !data) {
+      el.innerHTML = `<div class="wk-wellness-box"><span class="wk-wellness-empty"><i class="ti ti-info-circle" style="font-size:13px;vertical-align:-1px"></i> Няма Wellness запис за тази дата/сесия</span></div>`;
+      return;
+    }
+    const dots = WCRITERIA.map(k => {
+      const v = data[k];
+      const cls = v===1?'w-dot-r':v===2?'w-dot-y':'w-dot-g';
+      return `<span style="font-size:10px;color:var(--text3)">${WLABELS[k]}</span><span class="w-dot ${cls}"></span>`;
+    }).join('');
+    el.innerHTML = `<div class="wk-wellness-box"><span class="wlabel"><i class="ti ti-mood-smile" style="font-size:13px;vertical-align:-1px"></i> Wellness:</span><div class="wdots">${dots}</div></div>`;
+  } catch(e) { el.innerHTML = ''; }
+}
+
+function renderSetCards(existing) {
+  const el = document.getElementById('wk-sets');
+  const sets = existing || [1,2,3].map(n => ({n, active: n===1}));
+  el.innerHTML = [1,2,3].map(n => {
+    const data = existing ? existing.find(s => s.n === n) : null;
+    const isActive = data ? true : (n === 1);
+    return `<div class="set-card" id="set-card-${n}">
+      <div class="set-card-hdr">
+        <span class="set-card-title">Сет ${n}</span>
+        <button class="set-toggle" onclick="toggleSet(${n})" id="set-toggle-${n}">${isActive ? 'Премахни' : '+ Добави сет'}</button>
+      </div>
+      <div id="set-fields-${n}" style="display:${isActive ? 'block' : 'none'}">
+        <div class="g3">
+          <div class="field" style="margin-bottom:8px">
+            <label>Брой повт.</label>
+            <input type="number" id="set-${n}-reps" min="1" value="${data?.reps||''}">
+          </div>
+          <div class="field" style="margin-bottom:8px">
+            <label>Дистанция</label>
+            <input type="number" id="set-${n}-dist" min="1" value="${data?.dist||''}">
+          </div>
+          <div class="field" style="margin-bottom:8px">
+            <label>Режим</label>
+            <input type="text" id="set-${n}-mode" placeholder="@01:30" value="${data?.mode||''}">
+          </div>
+        </div>
+        <div class="g2">
+          <div class="field" style="margin-bottom:8px">
+            <label>Очакван лактат</label>
+            <input type="text" id="set-${n}-lac-exp" placeholder="4.0" value="${data?.lac_exp||''}">
+          </div>
+          <div class="field" style="margin-bottom:8px">
+            <label>Измерен лактат</label>
+            <input type="text" id="set-${n}-lac-act" placeholder="4.2" value="${data?.lac_act||''}">
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Постигнати времена</label>
+          <textarea id="set-${n}-times" rows="2" placeholder="напр. 1:32, 1:31, 1:33, 1:30"
+            style="width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:9px;background:#fff;font-family:Cambria,Georgia,serif;font-size:13px;color:var(--text);resize:vertical">${data?.times||''}</textarea>
+        </div>
+      </div>
+    </div>`;
+  }).join('') + `
+    <div class="field" style="margin-top:14px">
+      <label>Бележки</label>
+      <textarea id="wk-notes" rows="3" placeholder="общи бележки за тренировката..."
+        style="width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:9px;background:var(--beige);font-family:Cambria,Georgia,serif;font-size:13px;color:var(--text);resize:vertical">${existing?.notes||''}</textarea>
+    </div>`;
+}
+
+function toggleSet(n) {
+  const fields = document.getElementById(`set-fields-${n}`);
+  const btn = document.getElementById(`set-toggle-${n}`);
+  const isOpen = fields.style.display !== 'none';
+  fields.style.display = isOpen ? 'none' : 'block';
+  btn.textContent = isOpen ? '+ Добави сет' : 'Премахни';
+}
+
+function cancelWorkoutEdit() {
+  editingWorkoutId = null;
+  document.getElementById('wk-cancel-edit').style.display = 'none';
+  const btn = document.querySelector('#view-workouts .btn-main');
+  if (btn) btn.innerHTML = '<i class="ti ti-check"></i>Запази тренировка';
+}
+
+async function saveWorkout() {
+  const child = document.getElementById('wk-child').value;
+  const date = document.getElementById('wk-date').value;
+  const pool = document.getElementById('wk-pool').value;
+  const session = currentWkSession;
+  if (!child) { toast('Избери дете!', true); return; }
+  if (!date) { toast('Избери дата!', true); return; }
+
+  const sets = [];
+  [1,2,3].forEach(n => {
+    const fields = document.getElementById(`set-fields-${n}`);
+    if (fields.style.display === 'none') return;
+    const reps = document.getElementById(`set-${n}-reps`).value;
+    const dist = document.getElementById(`set-${n}-dist`).value;
+    const mode = document.getElementById(`set-${n}-mode`).value;
+    const lacExp = document.getElementById(`set-${n}-lac-exp`).value;
+    const lacAct = document.getElementById(`set-${n}-lac-act`).value;
+    const times = document.getElementById(`set-${n}-times`).value;
+    if (reps || dist || mode || lacExp || lacAct || times) {
+      sets.push({n, reps: parseInt(reps)||null, dist: parseInt(dist)||null, mode, lac_exp: lacExp, lac_act: lacAct, times});
+    }
+  });
+
+  if (!sets.length) { toast('Попълни поне един сет!', true); return; }
+
+  const notes = document.getElementById('wk-notes').value;
+  const row = {
+    child_name: child, entry_date: date, session, pool_size: parseInt(pool),
+    sets: JSON.stringify(sets), notes
+  };
+
+  try {
+    if (editingWorkoutId) {
+      const { error } = await _db.from('workout_logs').update(row).eq('id', editingWorkoutId);
+      if (error) { toast('Грешка при запис', true); console.log(error); return; }
+      toast('Тренировката е обновена');
+    } else {
+      const { error } = await _db.from('workout_logs').insert(row);
+      if (error) { toast('Грешка при запис', true); console.log(error); return; }
+      toast('Тренировката е запазена');
+    }
+    cancelWorkoutEdit();
+    if (document.getElementById('wkm-child').value === child) loadWorkoutsList();
+  } catch(e) { toast('Грешка при запис', true); }
+}
+
+async function loadWorkoutsList() {
+  const child = document.getElementById('wkm-child').value;
+  const el = document.getElementById('workouts-list');
+  if (!child) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="empty" style="padding:20px"><i class="ti ti-loader"></i><span>Зареждане…</span></div>';
+
+  try {
+    const { data, error } = await _db.from('workout_logs')
+      .select('*').eq('child_name', child)
+      .order('entry_date', {ascending:false});
+    if (error) throw error;
+    if (!data || !data.length) {
+      el.innerHTML = '<div class="empty" style="padding:20px"><i class="ti ti-mood-empty"></i><span>Няма записи</span></div>';
+      return;
+    }
+
+    // fetch all wellness for this child to cross-reference
+    let wellnessMap = {};
+    try {
+      const { data: wd } = await _db.from('wellness_logs').select('*').eq('child_name', child);
+      (wd||[]).forEach(w => { wellnessMap[w.entry_date+'|'+w.session] = w; });
+    } catch(e) {}
+
+    const sessLabel = {morning:'Сутрин', afternoon:'Следобед'};
+    el.innerHTML = data.map(r => {
+      const date = new Date(r.entry_date).toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit',year:'numeric'});
+      let sets = [];
+      try { sets = JSON.parse(r.sets || '[]'); } catch(e) {}
+      const w = wellnessMap[r.entry_date+'|'+r.session];
+      const wellnessDots = w ? WCRITERIA.map(k => {
+        const v = w[k]; const cls = v===1?'w-dot-r':v===2?'w-dot-y':'w-dot-g';
+        return `<span class="w-dot ${cls}" title="${WLABELS[k]}"></span>`;
+      }).join('') : '<span style="font-size:10px;color:var(--text3);font-style:italic">без Wellness</span>';
+
+      return `<div class="workout-card">
+        <div class="workout-top">
+          <div>
+            <div class="workout-date">${date} · ${sessLabel[r.session]||''}</div>
+            <div class="workout-meta">${r.pool_size}м басейн · ${sets.length} сет${sets.length!==1?'а':''}</div>
+          </div>
+          <div class="workout-actions">
+            <div style="display:flex;gap:3px;align-items:center;margin-right:6px">${wellnessDots}</div>
+            <button class="w-icon-btn" onclick='editWorkout(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
+              <i class="ti ti-pencil" style="font-size:15px;color:var(--navy)"></i>
+            </button>
+            <button class="w-icon-btn danger" onclick="deleteWorkout(${r.id},'${child}')">
+              <i class="ti ti-trash" style="font-size:15px;color:#c0392b"></i>
+            </button>
+          </div>
+        </div>
+        <div class="workout-body">
+          ${sets.map(s => `<div class="workout-set">
+            <div class="workout-set-title">Сет ${s.n}: ${s.reps||'-'}×${s.dist||'-'}м ${s.mode?('· '+s.mode):''}</div>
+            <div class="workout-set-grid">
+              <div>Очакван лактат: ${s.lac_exp||'-'}</div>
+              <div>Измерен лактат: ${s.lac_act||'-'}</div>
+            </div>
+            ${s.times ? `<div style="margin-top:4px;font-style:italic">Времена: ${s.times}</div>` : ''}
+          </div>`).join('')}
+          ${r.notes ? `<div class="workout-notes"><i class="ti ti-note" style="font-size:12px;vertical-align:-1px"></i> ${r.notes}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i><span>Грешка</span></div>'; }
+}
+
+function editWorkout(r) {
+  document.getElementById('wk-child').value = r.child_name;
+  document.getElementById('wk-date').value = r.entry_date;
+  document.getElementById('wk-pool').value = r.pool_size;
+  document.querySelectorAll('.session-btn').forEach(b => {
+    b.classList.toggle('sel', b.dataset.session === r.session);
+  });
+  currentWkSession = r.session;
+  let sets = [];
+  try { sets = JSON.parse(r.sets || '[]'); } catch(e) {}
+  renderSetCards(sets.length ? sets.map((s,i)=>({...s,n:s.n||i+1})) : null);
+  document.getElementById('wk-notes').value = r.notes || '';
+  // Reset toggles for sets not present
+  [1,2,3].forEach(n => {
+    const has = sets.find(s => s.n === n);
+    const btn = document.getElementById(`set-toggle-${n}`);
+    if (btn) btn.textContent = has ? 'Премахни' : '+ Добави сет';
+  });
+  editingWorkoutId = r.id;
+  document.querySelector('#view-workouts .btn-main').innerHTML = '<i class="ti ti-check"></i>Обнови тренировка';
+  document.getElementById('wk-cancel-edit').style.display = 'block';
+  loadWkWellnessPreview();
+  document.getElementById('view-workouts').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+async function deleteWorkout(id, child) {
+  try {
+    const { error } = await _db.from('workout_logs').delete().eq('id', id);
+    if (error) { toast('Грешка при изтриване', true); return; }
+    toast('Тренировката е изтрита');
+    loadWorkoutsList();
+  } catch(e) { toast('Грешка при изтриване', true); }
+}
 
 </script>
 </body>
