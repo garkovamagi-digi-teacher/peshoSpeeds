@@ -647,6 +647,21 @@ body::before {
 .workout-set-title { font-weight:700; color:var(--navy); font-style:italic; margin-bottom:3px; }
 .workout-set-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px; font-size:11px; color:var(--text3); }
 .workout-notes { font-size:12px; font-style:italic; color:var(--text2); margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); }
+/* ── COACH CORRECTION ── */
+.coach-label {
+  font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  color:rgba(255,255,255,0.55); padding:4px 4px 2px; text-align:center;
+  border-top:1px solid rgba(255,255,255,0.15);
+}
+.coach-input {
+  width:100%; border:none; border-top:1px solid rgba(255,255,255,0.2);
+  background:rgba(0,0,0,0.25); color:#fff;
+  font-family:Cambria,Georgia,serif; font-size:11px; font-weight:600;
+  text-align:center; padding:4px 2px 5px;
+  outline:none; cursor:pointer;
+}
+.coach-input:focus { background:rgba(0,0,0,0.4); }
+.coach-input::placeholder { color:rgba(255,255,255,0.35); font-style:italic; }
 </style>
 </head>
 <body>
@@ -1295,7 +1310,41 @@ function backToList(){
   Object.values(charts).forEach(c=>c.destroy());charts={};
 }
 
-function renderCH(){
+// coach corrections cache
+let coachCorrections = {};
+
+async function loadCoachCorrections(child) {
+  try {
+    const { data, error } = await _db.from('coach_corrections')
+      .select('*').eq('child_name', child);
+    if (error || !data) return;
+    coachCorrections = {};
+    data.forEach(r => {
+      const k = `${r.child_name}|${r.pool_size}|${r.distance}|${r.stroke}|${r.pct}`;
+      coachCorrections[k] = r.value;
+    });
+  } catch(e) {}
+}
+
+async function saveCoachCorrection(child, pool, dist, stroke, pct, val) {
+  const key = `${child}|${pool}|${dist}|${stroke}|${pct}`;
+  coachCorrections[key] = val;
+  try {
+    await _db.from('coach_corrections').upsert({
+      child_name: child, pool_size: parseInt(pool), distance: parseInt(dist),
+      stroke, pct: parseFloat(pct), value: val
+    }, {onConflict: 'child_name,pool_size,distance,stroke,pct'});
+  } catch(e) { console.log('coach correction save error', e); }
+}
+
+function fmtTimeInput(inp) {
+  const digits = inp.replace(/\D/g,'').slice(0,6);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return digits.slice(0,2)+':'+digits.slice(2);
+  return digits.slice(0,2)+':'+digits.slice(2,4)+'.'+digits.slice(4);
+}
+
+async function renderCH(){
   const pool=document.getElementById('hc-pool').value,style=document.getElementById('hc-style').value;
   let data=cData;
   if(pool)data=data.filter(r=>r.pool_size==pool);
@@ -1303,17 +1352,21 @@ function renderCH(){
   const el=document.getElementById('hc-body');
   Object.values(charts).forEach(c=>c.destroy());charts={};
   if(!data.length){el.innerHTML='<div class="empty"><i class="ti ti-mood-empty"></i><span>Няма записи</span></div>';return;}
+
+  await loadCoachCorrections(curChild);
+
   const bk={};
-  data.forEach(r=>{const k=r.pool_size+'|'+r.distance+'|'+r.stroke;if(!bk[k])bk[k]=[];bk[k].push(r);});
+  data.forEach(r=>{const k=r.pool_size+'||'+r.distance+'||'+r.stroke;if(!bk[k])bk[k]=[];bk[k].push(r);});
   el.innerHTML='';
   Object.keys(bk).sort().forEach(k=>{
-    const [p,d,s]=k.split('|');
+    const parts=k.split('||');
+    const [p,d,s]=[parts[0],parts[1],parts[2]];
     const rows=bk[k];
     const block=document.createElement('div');
     block.innerHTML=`<div class="dist-label-wrap"><span class="dist-label">${SLB[s]} · ${d}м · ${p}м басейн</span></div>`;
 
     if(rows.length>1){
-      const cid='ch-'+k.replace(/\|/g,'-');
+      const cid='ch-'+k.replace(/\|\|/g,'-');
       const cw=document.createElement('div');
       cw.innerHTML=`<div class="card" style="margin-bottom:8px"><div class="chart-wrap"><canvas id="${cid}"></canvas></div></div>`;
       block.appendChild(cw);
@@ -1341,24 +1394,34 @@ function renderCH(){
       const date=new Date(r.recorded_at).toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit',year:'numeric'});
       const entry=document.createElement('div');
       entry.className='hist-entry';
+      const pctCells=PCTS.map(pct=>{
+        const ck=`${curChild}|${p}|${d}|${s}|${pct}`;
+        const saved=coachCorrections[ck]||'';
+        const inputId=`cc-${r.id}-${Math.round(pct*100)}`;
+        return `<div class="hist-pct-cell" style="background:${PCOL[pct]}">
+          <div class="hist-pct-lbl">${Math.round(pct*100)}%</div>
+          <div class="hist-pct-v">${fmt(Math.round(adj*(2-pct)))}</div>
+          <div class="coach-label">корекция</div>
+          <input class="coach-input" id="${inputId}"
+            placeholder="00:00.00"
+            value="${saved}"
+            maxlength="8"
+            data-child="${curChild}" data-pool="${p}" data-dist="${d}" data-stroke="${s}" data-pct="${pct}"
+            oninput="this.value=fmtTimeInput(this.value)"
+            onblur="saveCoachCorrection(this.dataset.child,this.dataset.pool,this.dataset.dist,this.dataset.stroke,this.dataset.pct,this.value)">
+        </div>`;
+      }).join('');
       entry.innerHTML=
         `<div class="hist-top">
           <span class="hist-date"><i class="ti ti-calendar" style="font-size:12px"></i>${date}</span>
           <span class="hist-tempo">${fmt(r.time_hundredths)}</span>
         </div>
-        <div class="hist-pct-row">
-          ${PCTS.map(p=>`<div class="hist-pct-cell" style="background:${PCOL[p]}">
-            <div class="hist-pct-lbl">${Math.round(p*100)}%</div>
-            <div class="hist-pct-v">${fmt(Math.round(adj*(2-p)))}</div>
-            <div class="hist-pct-v2">${fmt(Math.round(adj/p))}</div>
-          </div>`).join('')}
-        </div>`;
+        <div class="hist-pct-row">${pctCells}</div>`;
       block.appendChild(entry);
     });
     el.appendChild(block);
   });
 }
-
 
 // ── DELETE ──
 let delData=[], pendingDelId=null, pendingDelChild=null;
@@ -2048,7 +2111,6 @@ async function loadWorkoutsList() {
       return;
     }
 
-    // fetch all wellness for this child to cross-reference
     let wellnessMap = {};
     try {
       const { data: wd } = await _db.from('wellness_logs').select('*').eq('child_name', child);
@@ -2056,45 +2118,71 @@ async function loadWorkoutsList() {
     } catch(e) {}
 
     const sessLabel = {morning:'Сутрин', afternoon:'Следобед'};
-    el.innerHTML = data.map(r => {
-      const date = new Date(r.entry_date).toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+    let html = `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r)">
+    <table class="all-table" style="min-width:700px">
+      <thead><tr>
+        <th style="text-align:left;padding-left:12px;min-width:90px">Дата</th>
+        <th>Сесия</th>
+        <th>Сет</th>
+        <th>Повт.</th>
+        <th>Дист.</th>
+        <th>Режим</th>
+        <th>Почивка</th>
+        <th>Оч.лактат</th>
+        <th>Изм.лактат</th>
+        <th style="min-width:120px">Времена</th>
+        <th style="min-width:80px">Wellness</th>
+        <th></th>
+      </tr></thead>
+      <tbody>`;
+
+    data.forEach(r => {
+      const date = new Date(r.entry_date).toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit',year:'2-digit'});
       let sets = [];
       try { sets = JSON.parse(r.sets || '[]'); } catch(e) {}
+      if (!sets.length) sets = [{n:1}];
+      const filledSets = sets.filter(s => s.reps || s.dist || s.mode || s.rest || s.lac_exp || s.lac_act || s.times);
+      if (!filledSets.length) filledSets.push(sets[0]); // показвай поне един ред
+
       const w = wellnessMap[r.entry_date+'|'+r.session];
       const wellnessDots = w ? WCRITERIA.map(k => {
         const v = w[k]; const cls = v===1?'w-dot-r':v===2?'w-dot-y':'w-dot-g';
-        return `<span class="w-dot ${cls}" title="${WLABELS[k]}"></span>`;
-      }).join('') : '<span style="font-size:10px;color:var(--text3);font-style:italic">без Wellness</span>';
+        return `<span class="w-dot ${cls}" title="${WLABELS[k]}" style="width:10px;height:10px"></span>`;
+      }).join('') : '<span style="font-size:9px;color:var(--text3)">—</span>';
 
-      return `<div class="workout-card">
-        <div class="workout-top">
-          <div>
-            <div class="workout-date">${date} · ${sessLabel[r.session]||''}</div>
-            <div class="workout-meta">${r.pool_size}м басейн · ${sets.length} сет${sets.length!==1?'а':''}</div>
-          </div>
-          <div class="workout-actions">
-            <div style="display:flex;gap:3px;align-items:center;margin-right:6px">${wellnessDots}</div>
-            <button class="w-icon-btn" onclick='editWorkout(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
-              <i class="ti ti-pencil" style="font-size:15px;color:var(--navy)"></i>
-            </button>
-            <button class="w-icon-btn danger" onclick="deleteWorkout(${r.id},'${child}')">
-              <i class="ti ti-trash" style="font-size:15px;color:#c0392b"></i>
-            </button>
-          </div>
-        </div>
-        <div class="workout-body">
-          ${sets.map(s => `<div class="workout-set">
-            <div class="workout-set-title">Сет ${s.n}: ${s.reps||'-'}×${s.dist||'-'}м ${s.mode?('· '+s.mode):''}${s.rest?(' · почивка '+s.rest):''}</div>
-            <div class="workout-set-grid">
-              <div>Очакван лактат: ${s.lac_exp||'-'}</div>
-              <div>Измерен лактат: ${s.lac_act||'-'}</div>
-            </div>
-            ${s.times ? `<div style="margin-top:4px;font-style:italic">Времена: ${s.times}</div>` : ''}
-          </div>`).join('')}
-          ${r.notes ? `<div class="workout-notes"><i class="ti ti-note" style="font-size:12px;vertical-align:-1px"></i> ${r.notes}</div>` : ''}
-        </div>
+      const actions = `<div style="display:flex;gap:4px;justify-content:center">
+        <button class="w-icon-btn" style="width:28px;height:28px" onclick='editWorkout(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
+          <i class="ti ti-pencil" style="font-size:13px;color:var(--navy)"></i>
+        </button>
+        <button class="w-icon-btn danger" style="width:28px;height:28px" onclick="deleteWorkout(${r.id},'${child}')">
+          <i class="ti ti-trash" style="font-size:13px;color:#c0392b"></i>
+        </button>
       </div>`;
-    }).join('');
+
+      filledSets.forEach((s, i) => {
+        const isFirst = i === 0;
+        const rowspan = filledSets.length;
+        html += `<tr style="border-bottom:1px solid var(--border)">
+          ${isFirst ? `<td style="font-weight:700;font-style:italic;color:var(--navy);padding-left:12px;vertical-align:top;padding-top:10px" rowspan="${rowspan}">${date}</td>
+          <td style="font-size:11px;color:var(--text3);vertical-align:top;padding-top:10px;text-align:center" rowspan="${rowspan}">${sessLabel[r.session]||''}<br><span style="font-size:10px">${r.pool_size}м</span></td>` : ''}
+          <td style="text-align:center;font-weight:700;color:var(--navy)">С${s.n||i+1}</td>
+          <td style="text-align:center">${s.reps||'—'}</td>
+          <td style="text-align:center">${s.dist ? s.dist+'м' : '—'}</td>
+          <td style="text-align:center;font-family:monospace;font-size:12px">${s.mode||'—'}</td>
+          <td style="text-align:center;font-size:12px">${s.rest||'—'}</td>
+          <td style="text-align:center;font-size:12px">${s.lac_exp||'—'}</td>
+          <td style="text-align:center;font-size:12px">${s.lac_act||'—'}</td>
+          <td style="font-size:11px;font-style:italic;color:var(--text2);max-width:140px">${s.times||'—'}</td>
+          ${isFirst ? `<td style="vertical-align:top;padding-top:8px;text-align:center" rowspan="${rowspan}"><div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap">${wellnessDots}</div>${r.notes?`<div style="font-size:9px;font-style:italic;color:var(--text3);margin-top:4px">${r.notes}</div>`:''}
+          </td>
+          <td style="vertical-align:top;padding-top:6px" rowspan="${rowspan}">${actions}</td>` : ''}
+        </tr>`;
+      });
+    });
+
+    html += '</tbody></table></div>';
+    el.innerHTML = html;
   } catch(e) { el.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i><span>Грешка</span></div>'; }
 }
 
