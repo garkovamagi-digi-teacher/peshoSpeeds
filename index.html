@@ -694,21 +694,20 @@ body::before {
   <div class="sb-nav">
     <div class="sb-lbl">Основно</div>
 
-    <button class="sb-item" onclick="nav('all')">
-      <i class="ti ti-users"></i><span>Всички деца</span>
-    </button>
     <button class="sb-item active" onclick="nav('history')">
       <i class="ti ti-chart-line"></i><span>Прогрес по деца</span>
     </button>
-
-    <button class="sb-item" onclick="nav('wellness')">
-      <i class="ti ti-mood-smile"></i><span>Wellness</span>
+    <button class="sb-item" onclick="nav('lactate')">
+      <i class="ti ti-chart-dots"></i><span>Лактатни графики</span>
     </button>
     <button class="sb-item" onclick="nav('workouts')">
       <i class="ti ti-clipboard-list"></i><span>Плувани серии</span>
     </button>
-    <button class="sb-item" onclick="nav('lactate')">
-      <i class="ti ti-chart-line"></i><span>Лактатни графики</span>
+    <button class="sb-item" onclick="nav('all')">
+      <i class="ti ti-users"></i><span>Всички деца</span>
+    </button>
+    <button class="sb-item" onclick="nav('wellness')">
+      <i class="ti ti-mood-smile"></i><span>Wellness</span>
     </button>
     <div class="sb-div"></div>
     <div class="sb-lbl">Номенклатури</div>
@@ -1473,7 +1472,7 @@ let DISTS = {
 };
 let curChild=null,cData=[],charts={};
 let activeDistTab='crawl';
-const VIEWS=['history','lactate','workouts','all','wellness','delete','nomenclatures','enter'];
+const VIEWS=['history','lactate','workouts','all','wellness','nomenclatures','delete','enter'];
 const VT={enter:'Въведи темпо',all:'Всички деца',history:'Прогрес по деца',delete:'Изтриване',wellness:'Wellness',workouts:'Плувани серии',lactate:'Лактатни графики',nomenclatures:'Номенклатури'};
 
 function getDists(s){return DISTS[s]||[50,100,200,400];}
