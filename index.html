@@ -654,6 +654,15 @@ body::before {
 .workout-set-title { font-weight:700; color:var(--navy); font-style:italic; margin-bottom:3px; }
 .workout-set-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px; font-size:11px; color:var(--text3); }
 .workout-notes { font-size:12px; font-style:italic; color:var(--text2); margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); }
+.nom-tab {
+  flex:1; padding:8px 4px; border-radius:8px;
+  border:none; background:transparent; cursor:pointer;
+  font-family:Cambria,Georgia,serif; font-size:13px; font-style:italic;
+  color:var(--text2); transition:all .18s;
+}
+.nom-tab.active { background:var(--surface,#fff); color:var(--navy); font-weight:700;
+  border:0.5px solid var(--border); box-shadow:0 1px 4px rgba(0,0,0,.06); }
+
 /* ── COACH CORRECTION ── */
 .coach-label {
   font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
@@ -696,17 +705,19 @@ body::before {
     <button class="sb-item" onclick="nav('delete')">
       <i class="ti ti-trash"></i><span>Изтриване</span>
     </button>
-    <button class="sb-item" onclick="nav('children')">
-      <i class="ti ti-user-plus"></i><span>Деца</span>
-    </button>
-    <button class="sb-item" onclick="nav('distances')">
-      <i class="ti ti-ruler"></i><span>Дистанции</span>
-    </button>
     <button class="sb-item" onclick="nav('wellness')">
       <i class="ti ti-mood-smile"></i><span>Wellness</span>
     </button>
     <button class="sb-item" onclick="nav('workouts')">
       <i class="ti ti-clipboard-list"></i><span>Плувани серии</span>
+    </button>
+    <button class="sb-item" onclick="nav('lactate')">
+      <i class="ti ti-chart-line"></i><span>Лактатни графики</span>
+    </button>
+    <div class="sb-div"></div>
+    <div class="sb-lbl">Номенклатури</div>
+    <button class="sb-item" onclick="nav('nomenclatures')">
+      <i class="ti ti-list-details"></i><span>Номенклатури</span>
     </button>
   </div>
   <div class="sb-footer">© 2025 · Aqua Pro</div>
@@ -1013,6 +1024,267 @@ body::before {
     </div>
   </div>
 
+  <!-- VIEW: NOMENCLATURES -->
+  <div class="view" id="view-nomenclatures">
+    <div class="sh"><h2>Номенклатури</h2><span>управление на списъците</span></div>
+
+    <!-- TABS -->
+    <div style="display:flex;gap:2px;background:var(--beige2);border-radius:var(--border-radius-md,10px);padding:3px;margin-bottom:14px">
+      <button class="nom-tab active" onclick="selectNomTab('series',this)">Серии</button>
+      <button class="nom-tab" onclick="selectNomTab('children',this)">Деца</button>
+      <button class="nom-tab" onclick="selectNomTab('distances',this)">Дистанции</button>
+    </div>
+
+    <!-- SERIES -->
+    <div id="nom-series">
+      <div class="card">
+        <div class="card-hdr"><i class="ti ti-plus"></i>Добави вид серия</div>
+        <div class="card-body">
+          <div class="g2">
+            <div class="field">
+              <label>Тип (1-9)</label>
+              <select id="ns-type">
+                <option value="">— избери —</option>
+                <option>1</option><option>2</option><option>3</option>
+                <option>4</option><option>5</option><option>6</option>
+                <option>7</option><option>8</option><option>9</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Вид (свободен текст)</label>
+              <input type="text" id="ns-name" placeholder="напр. Аеробна основа">
+            </div>
+          </div>
+          <div class="g3">
+            <div class="field" style="margin-bottom:0">
+              <label>Повторения</label>
+              <input type="text" id="ns-reps" placeholder="напр. 6">
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Дистанция</label>
+              <input type="text" id="ns-dist" placeholder="напр. 200м">
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Режим</label>
+              <input type="text" id="ns-mode" placeholder="@2:30">
+            </div>
+          </div>
+          <div class="field" style="margin-top:10px;margin-bottom:10px">
+            <label>Почивка</label>
+            <input type="text" id="ns-rest" placeholder="напр. 45 сек">
+          </div>
+          <button class="btn-main" onclick="addSeriesNom()">
+            <i class="ti ti-plus"></i>Добави
+          </button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><i class="ti ti-list"></i>Дефинирани серии</div>
+        <div id="series-nom-list" style="padding:4px 0"></div>
+      </div>
+    </div>
+
+    <!-- CHILDREN -->
+    <div id="nom-children" style="display:none">
+      <div class="card">
+        <div class="card-hdr"><i class="ti ti-user-plus"></i>Добави дете</div>
+        <div class="card-body">
+          <div class="g2" style="align-items:end">
+            <div class="field" style="margin-bottom:0">
+              <label>Име</label>
+              <input type="text" id="new-child-name" placeholder="напр. Мария" maxlength="40">
+            </div>
+            <button class="btn-main" style="margin-top:0" onclick="addChild()">
+              <i class="ti ti-plus"></i>Добави
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><i class="ti ti-users"></i>Текущи деца</div>
+        <div id="children-list" style="padding:8px 0"></div>
+      </div>
+    </div>
+
+    <!-- DISTANCES -->
+    <div id="nom-distances" style="display:none">
+      <div class="card">
+        <div class="card-hdr"><i class="ti ti-plus"></i>Добави дистанция</div>
+        <div class="card-body">
+          <div class="field">
+            <label>Стил</label>
+            <select id="dist-style-sel">
+              <option value="crawl">Кроул</option>
+              <option value="back">Гръб</option>
+              <option value="fly">Делфин</option>
+              <option value="breast">Бруст</option>
+            </select>
+          </div>
+          <div class="g2" style="align-items:end">
+            <div class="field" style="margin-bottom:0">
+              <label>Метри</label>
+              <input type="number" id="new-dist-val" placeholder="напр. 800" min="1" max="9999">
+            </div>
+            <button class="btn-main" style="margin-top:0" onclick="addDist()">
+              <i class="ti ti-plus"></i>Добави
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><i class="ti ti-list"></i>Текущи дистанции</div>
+        <div style="padding:0">
+          <div style="display:flex;gap:0;border-bottom:1px solid var(--border)">
+            <button class="dist-style-tab active" onclick="selectDistTab('crawl',this)">Кроул</button>
+            <button class="dist-style-tab" onclick="selectDistTab('back',this)">Гръб</button>
+            <button class="dist-style-tab" onclick="selectDistTab('fly',this)">Делфин</button>
+            <button class="dist-style-tab" onclick="selectDistTab('breast',this)">Бруст</button>
+          </div>
+          <div id="dist-list" style="padding:4px 0"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW: LACTATE -->
+  <div class="view" id="view-lactate">
+    <div class="sh"><h2>Лактат</h2><span>графики по тип серия</span></div>
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-adjustments"></i>Параметри</div>
+      <div class="card-body">
+        <div class="g3">
+          <div class="field">
+            <label>Дете</label>
+            <select id="lac-child" onchange="loadLactateChart()"><option value="">— избери —</option></select>
+          </div>
+          <div class="field">
+            <label>Тип серия</label>
+            <select id="lac-type" onchange="loadLactateChart()">
+              <option value="">— избери —</option>
+              <option>1</option><option>2</option><option>3</option>
+              <option>4</option><option>5</option><option>6</option>
+              <option>7</option><option>8</option><option>9</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Басейн</label>
+            <select id="lac-pool" onchange="loadLactateChart()">
+              <option value="">И двата</option>
+              <option value="25">25м</option>
+              <option value="50">50м</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="lactate-chart-wrap"></div>
+    <div id="lactate-series-info"></div>
+  </div>
+
+  <!-- VIEW: WELLNESS -->
+  <div class="view" id="view-wellness">
+    <div class="sh"><h2>Wellness</h2><span>дневен чек на състоянието</span></div>
+
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-clipboard-check"></i>Нов запис</div>
+      <div class="card-body">
+        <div class="g3">
+          <div class="field">
+            <label>Дете</label>
+            <select id="w-child"><option value="">— избери —</option></select>
+          </div>
+          <div class="field">
+            <label>Дата</label>
+            <input type="date" id="w-date">
+          </div>
+          <div class="field">
+            <label>Сесия</label>
+            <select id="w-session">
+              <option value="morning">Сутрин</option>
+              <option value="afternoon">Следобед</option>
+              <option value="single">Единична</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="wellness-row" data-key="energy">
+          <span class="wellness-label">Енергия / Умора</span>
+          <div class="wellness-rag">
+            <button class="rag-btn rag-r" onclick="setRag(this,'energy')"></button>
+            <button class="rag-btn rag-y" onclick="setRag(this,'energy')"></button>
+            <button class="rag-btn rag-g" onclick="setRag(this,'energy')"></button>
+          </div>
+        </div>
+        <div class="wellness-row" data-key="compliance">
+          <span class="wellness-label">Следва инструкции</span>
+          <div class="wellness-rag">
+            <button class="rag-btn rag-r" onclick="setRag(this,'compliance')"></button>
+            <button class="rag-btn rag-y" onclick="setRag(this,'compliance')"></button>
+            <button class="rag-btn rag-g" onclick="setRag(this,'compliance')"></button>
+          </div>
+        </div>
+        <div class="wellness-row" data-key="complaints">
+          <span class="wellness-label">Оплаквания</span>
+          <div class="wellness-rag">
+            <button class="rag-btn rag-r" onclick="setRag(this,'complaints')"></button>
+            <button class="rag-btn rag-y" onclick="setRag(this,'complaints')"></button>
+            <button class="rag-btn rag-g" onclick="setRag(this,'complaints')"></button>
+          </div>
+        </div>
+        <div class="wellness-row" data-key="focus">
+          <span class="wellness-label">Концентрация / Фокус</span>
+          <div class="wellness-rag">
+            <button class="rag-btn rag-r" onclick="setRag(this,'focus')"></button>
+            <button class="rag-btn rag-y" onclick="setRag(this,'focus')"></button>
+            <button class="rag-btn rag-g" onclick="setRag(this,'focus')"></button>
+          </div>
+        </div>
+
+        <button class="btn-main" id="w-save-btn" onclick="saveWellness()">
+          <i class="ti ti-check"></i>Запази запис
+        </button>
+        <button class="btn-cancel" id="w-cancel-edit" style="display:none;width:100%;margin-top:8px;padding:12px" onclick="cancelWellnessEdit()">
+          Отказ на редакция
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-list-details"></i>Минали записи</div>
+      <div class="card-body">
+        <div class="field" style="margin-bottom:10px">
+          <label>Дете</label>
+          <select id="wm-child" onchange="loadWellnessManage()"><option value="">— избери —</option></select>
+        </div>
+        <div id="wellness-manage-list"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><i class="ti ti-chart-dots"></i>Анализ</div>
+      <div class="card-body">
+        <div class="g2">
+          <div class="field">
+            <label>Дете</label>
+            <select id="wa-child" onchange="loadWellnessAnalysis()"><option value="">— избери —</option></select>
+          </div>
+          <div class="field">
+            <label>Изглед</label>
+            <select id="wa-mode" onchange="loadWellnessAnalysis()">
+              <option value="overview">Общ изглед (всички)</option>
+              <option value="energy">Енергия / Умора</option>
+              <option value="compliance">Следва инструкции</option>
+              <option value="complaints">Оплаквания</option>
+              <option value="focus">Концентрация / Фокус</option>
+            </select>
+          </div>
+        </div>
+        <div id="wellness-chart-wrap" style="margin-top:10px"></div>
+        <div id="wellness-table-wrap" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- VIEW: WORKOUTS -->
   <div class="view" id="view-workouts">
     <div class="sh"><h2>Плувани серии</h2><span>дневник на тренировки</span></div>
@@ -1020,15 +1292,17 @@ body::before {
     <div class="card">
       <div class="card-hdr"><i class="ti ti-clipboard-plus"></i>Нов запис</div>
       <div class="card-body">
-        <div class="g3">
+        <div class="g2">
           <div class="field">
             <label>Дете</label>
-            <select id="wk-child"><option value="">— избери —</option></select>
+            <select id="wk-child" onchange="loadWkWellnessPreview()"><option value="">— избери —</option></select>
           </div>
           <div class="field">
             <label>Дата</label>
-            <input type="date" id="wk-date">
+            <input type="date" id="wk-date" onchange="loadWkWellnessPreview()">
           </div>
+        </div>
+        <div class="g3">
           <div class="field">
             <label>Басейн</label>
             <select id="wk-pool">
@@ -1036,22 +1310,34 @@ body::before {
               <option value="50">50м</option>
             </select>
           </div>
+          <div class="field">
+            <label>Тип серия</label>
+            <select id="wk-type">
+              <option value="">— избери —</option>
+              <option>1</option><option>2</option><option>3</option>
+              <option>4</option><option>5</option><option>6</option>
+              <option>7</option><option>8</option><option>9</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Вид серия</label>
+            <select id="wk-series-kind"><option value="">— избери —</option></select>
+          </div>
         </div>
         <div class="field">
-          <label>Време</label>
+          <label>Сесия</label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <button class="session-btn sel" data-session="morning" onclick="selectSession(this)">Сутрин</button>
             <button class="session-btn" data-session="afternoon" onclick="selectSession(this)">Следобед</button>
           </div>
         </div>
-
-        <!-- wellness preview -->
+        <div class="field">
+          <label>Измерен лактат</label>
+          <input type="text" id="wk-lactate" placeholder="4.2">
+        </div>
         <div id="wk-wellness-preview"></div>
-
-        <div id="wk-sets"></div>
-
-        <button class="btn-main" onclick="saveWorkout()">
-          <i class="ti ti-check"></i>Запази тренировка
+        <button class="btn-main" id="wk-save-btn" onclick="saveWorkout()">
+          <i class="ti ti-check"></i>Запази
         </button>
         <button class="btn-cancel" id="wk-cancel-edit" style="display:none;width:100%;margin-top:8px;padding:12px" onclick="cancelWorkoutEdit()">
           Отказ на редакция
@@ -1070,6 +1356,7 @@ body::before {
       </div>
     </div>
   </div>
+
 
   <!-- VIEW: DISTANCES -->
   <div class="view" id="view-distances">
@@ -1184,8 +1471,8 @@ let DISTS = {
 };
 let curChild=null,cData=[],charts={};
 let activeDistTab='crawl';
-const VIEWS=['enter','all','history','delete','children','distances','wellness','workouts'];
-const VT={enter:'Въведи темпо',all:'Всички деца',history:'История',delete:'Изтриване',children:'Управление на деца',distances:'Дистанции',wellness:'Wellness',workouts:'Плувани серии'};
+const VIEWS=['enter','all','history','delete','wellness','workouts','lactate','nomenclatures'];
+const VT={enter:'Въведи темпо',all:'Всички деца',history:'История',delete:'Изтриване',wellness:'Wellness',workouts:'Плувани серии',lactate:'Лактатни графики',nomenclatures:'Номенклатури'};
 
 function getDists(s){return DISTS[s]||[50,100,200,400];}
 function fillDists(id,style){
@@ -1223,10 +1510,10 @@ function nav(v){
   if(v==='all'){syncAD();loadAll();}
   if(v==='history')loadHistList();
   if(v==='delete')loadDelList();
-  if(v==='children')loadChildrenMgmt();
-  if(v==='distances')renderDistMgmt();
+  if(v==='nomenclatures')initNomenclatures();
   if(v==='wellness')initWellness();
   if(v==='workouts')initWorkouts();
+  if(v==='lactate')initLactate();
 }
 
 function calcAndSave(){
@@ -1936,20 +2223,115 @@ async function loadWellnessAnalysis() {
   tableEl.innerHTML = html;
 }
 
-// ── WORKOUTS (Плувани серии) ──
+// ── NOMENCLATURES (Серии) ──
+let seriesNomList = [];
+
+async function initNomenclatures() {
+  await fetchChildrenFromDB();
+  renderChildrenMgmt();
+  await fetchDistsFromDB();
+  renderDistList(activeDistTab);
+  await loadSeriesNom();
+  selectNomTab('series', document.querySelector('.nom-tab'));
+}
+
+function selectNomTab(tab, btn) {
+  ['series','children','distances'].forEach(t => {
+    document.getElementById('nom-'+t).style.display = t===tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.nom-tab').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+
+async function loadSeriesNom() {
+  try {
+    const { data, error } = await _db.from('series_nomenclatures').select('*').order('type').order('name');
+    if (error) return;
+    seriesNomList = data || [];
+    renderSeriesNomList();
+    updateSeriesKindDropdowns();
+  } catch(e) {}
+}
+
+function renderSeriesNomList() {
+  const el = document.getElementById('series-nom-list');
+  if (!el) return;
+  if (!seriesNomList.length) {
+    el.innerHTML = '<div class="empty" style="padding:20px"><i class="ti ti-mood-empty"></i><span>Няма серии</span></div>';
+    return;
+  }
+  el.innerHTML = seriesNomList.map((s,i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;
+      padding:10px 16px;border-bottom:${i<seriesNomList.length-1?'1px solid var(--border)':'none'}">
+      <div>
+        <div style="font-size:14px;font-weight:700;font-style:italic;color:var(--navy)">
+          Тип ${s.type} · ${s.name}
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">
+          ${[s.reps?s.reps+'×':'', s.dist||'', s.mode||'', s.rest?'почивка '+s.rest:''].filter(Boolean).join(' · ')}
+        </div>
+      </div>
+      <button onclick="deleteSeriesNom(${s.id})"
+        style="width:32px;height:32px;border-radius:8px;border:1px solid #f8d7d7;
+        background:#fff0f0;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <i class="ti ti-x" style="font-size:15px;color:#c0392b"></i>
+      </button>
+    </div>`).join('');
+}
+
+function updateSeriesKindDropdowns() {
+  ['wk-series-kind'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— избери —</option>' +
+      seriesNomList.map(s => `<option value="${s.id}" ${s.id==cur?'selected':''}>${s.type} · ${s.name}</option>`).join('');
+  });
+}
+
+async function addSeriesNom() {
+  const type = document.getElementById('ns-type').value;
+  const name = document.getElementById('ns-name').value.trim();
+  if (!type || !name) { toast('Избери тип и въведи вид!', true); return; }
+  const reps = document.getElementById('ns-reps').value.trim();
+  const dist = document.getElementById('ns-dist').value.trim();
+  const mode = document.getElementById('ns-mode').value.trim();
+  const rest = document.getElementById('ns-rest').value.trim();
+  try {
+    const { error } = await _db.from('series_nomenclatures').insert({type:parseInt(type), name, reps, dist, mode, rest});
+    if (error) { toast('Грешка при запис', true); return; }
+    toast('Серията е добавена');
+    ['ns-type','ns-name','ns-reps','ns-dist','ns-mode','ns-rest'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.value='';
+    });
+    await loadSeriesNom();
+  } catch(e) { toast('Грешка', true); }
+}
+
+async function deleteSeriesNom(id) {
+  try {
+    const { error } = await _db.from('series_nomenclatures').delete().eq('id', id);
+    if (error) { toast('Грешка', true); return; }
+    toast('Изтрито');
+    await loadSeriesNom();
+  } catch(e) { toast('Грешка', true); }
+}
+
+// ── WORKOUTS ──
 let editingWorkoutId = null;
 let currentWkSession = 'morning';
 
 function initWorkouts() {
   ['wk-child','wkm-child'].forEach(id => {
     const sel = document.getElementById(id);
+    if (!sel) return;
     const cur = sel.value;
     sel.innerHTML = '<option value="">— избери —</option>' +
       childrenList.map(n => `<option${n===cur?' selected':''}>${n}</option>`).join('');
   });
   document.getElementById('wk-date').value = new Date().toISOString().split('T')[0];
+  updateSeriesKindDropdowns();
   cancelWorkoutEdit();
-  renderSetCards();
   loadWkWellnessPreview();
 }
 
@@ -1968,6 +2350,7 @@ async function loadWkWellnessPreview() {
   const child = document.getElementById('wk-child').value;
   const date = document.getElementById('wk-date').value;
   const el = document.getElementById('wk-wellness-preview');
+  if (!el) return;
   if (!child || !date) { el.innerHTML = ''; return; }
   try {
     const { data, error } = await _db.from('wellness_logs')
@@ -1977,125 +2360,49 @@ async function loadWkWellnessPreview() {
       return;
     }
     const dots = WCRITERIA.map(k => {
-      const v = data[k];
-      const cls = v===1?'w-dot-r':v===2?'w-dot-y':'w-dot-g';
+      const v = data[k]; const cls = v===1?'w-dot-r':v===2?'w-dot-y':'w-dot-g';
       return `<span style="font-size:10px;color:var(--text3)">${WLABELS[k]}</span><span class="w-dot ${cls}"></span>`;
     }).join('');
     el.innerHTML = `<div class="wk-wellness-box"><span class="wlabel"><i class="ti ti-mood-smile" style="font-size:13px;vertical-align:-1px"></i> Wellness:</span><div class="wdots">${dots}</div></div>`;
   } catch(e) { el.innerHTML = ''; }
 }
 
-function renderSetCards(existing) {
-  const el = document.getElementById('wk-sets');
-  const sets = existing || [1,2,3].map(n => ({n, active: n===1}));
-  el.innerHTML = [1,2,3].map(n => {
-    const data = existing ? existing.find(s => s.n === n) : null;
-    const isActive = data ? true : (n === 1);
-    return `<div class="set-card" id="set-card-${n}">
-      <div class="set-card-hdr">
-        <span class="set-card-title">Сет ${n}</span>
-        <button class="set-toggle" onclick="toggleSet(${n})" id="set-toggle-${n}">${isActive ? 'Премахни' : '+ Добави сет'}</button>
-      </div>
-      <div id="set-fields-${n}" style="display:${isActive ? 'block' : 'none'}">
-        <div class="g3">
-          <div class="field" style="margin-bottom:8px">
-            <label>Брой повт.</label>
-            <input type="number" id="set-${n}-reps" min="1" value="${data?.reps||''}">
-          </div>
-          <div class="field" style="margin-bottom:8px">
-            <label>Дистанция</label>
-            <input type="number" id="set-${n}-dist" min="1" value="${data?.dist||''}">
-          </div>
-          <div class="field" style="margin-bottom:8px">
-            <label>Режим</label>
-            <input type="text" id="set-${n}-mode" placeholder="@01:30" value="${data?.mode||''}">
-          </div>
-        </div>
-        <div class="field" style="margin-bottom:8px">
-          <label>Почивка</label>
-          <input type="text" id="set-${n}-rest" placeholder="напр. 30 сек" value="${data?.rest||''}">
-        </div>
-        <div class="g2">
-          <div class="field" style="margin-bottom:8px">
-            <label>Очакван лактат</label>
-            <input type="text" id="set-${n}-lac-exp" placeholder="4.0" value="${data?.lac_exp||''}">
-          </div>
-          <div class="field" style="margin-bottom:8px">
-            <label>Измерен лактат</label>
-            <input type="text" id="set-${n}-lac-act" placeholder="4.2" value="${data?.lac_act||''}">
-          </div>
-        </div>
-        <div class="field" style="margin-bottom:0">
-          <label>Постигнати времена</label>
-          <textarea id="set-${n}-times" rows="2" placeholder="напр. 1:32, 1:31, 1:33, 1:30"
-            style="width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:9px;background:#fff;font-family:Cambria,Georgia,serif;font-size:13px;color:var(--text);resize:vertical">${data?.times||''}</textarea>
-        </div>
-      </div>
-    </div>`;
-  }).join('') + `
-    <div class="field" style="margin-top:14px">
-      <label>Бележки</label>
-      <textarea id="wk-notes" rows="3" placeholder="общи бележки за тренировката..."
-        style="width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:9px;background:var(--beige);font-family:Cambria,Georgia,serif;font-size:13px;color:var(--text);resize:vertical">${existing?.notes||''}</textarea>
-    </div>`;
-}
-
-function toggleSet(n) {
-  const fields = document.getElementById(`set-fields-${n}`);
-  const btn = document.getElementById(`set-toggle-${n}`);
-  const isOpen = fields.style.display !== 'none';
-  fields.style.display = isOpen ? 'none' : 'block';
-  btn.textContent = isOpen ? '+ Добави сет' : 'Премахни';
-}
-
 function cancelWorkoutEdit() {
   editingWorkoutId = null;
-  document.getElementById('wk-cancel-edit').style.display = 'none';
-  const btn = document.querySelector('#view-workouts .btn-main');
-  if (btn) btn.innerHTML = '<i class="ti ti-check"></i>Запази тренировка';
+  const btn = document.getElementById('wk-save-btn');
+  if (btn) btn.innerHTML = '<i class="ti ti-check"></i>Запази';
+  const cancel = document.getElementById('wk-cancel-edit');
+  if (cancel) cancel.style.display = 'none';
 }
 
 async function saveWorkout() {
   const child = document.getElementById('wk-child').value;
   const date = document.getElementById('wk-date').value;
   const pool = document.getElementById('wk-pool').value;
+  const type = document.getElementById('wk-type').value;
+  const seriesKind = document.getElementById('wk-series-kind').value;
+  const lactate = document.getElementById('wk-lactate').value;
   const session = currentWkSession;
   if (!child) { toast('Избери дете!', true); return; }
   if (!date) { toast('Избери дата!', true); return; }
 
-  const sets = [];
-  [1,2,3].forEach(n => {
-    const fields = document.getElementById(`set-fields-${n}`);
-    if (fields.style.display === 'none') return;
-    const reps = document.getElementById(`set-${n}-reps`).value;
-    const dist = document.getElementById(`set-${n}-dist`).value;
-    const mode = document.getElementById(`set-${n}-mode`).value;
-    const rest = document.getElementById(`set-${n}-rest`).value;
-    const lacExp = document.getElementById(`set-${n}-lac-exp`).value;
-    const lacAct = document.getElementById(`set-${n}-lac-act`).value;
-    const times = document.getElementById(`set-${n}-times`).value;
-    if (reps || dist || mode || rest || lacExp || lacAct || times) {
-      sets.push({n, reps: parseInt(reps)||null, dist: parseInt(dist)||null, mode, rest, lac_exp: lacExp, lac_act: lacAct, times});
-    }
-  });
-
-  if (!sets.length) { toast('Попълни поне един сет!', true); return; }
-
-  const notes = document.getElementById('wk-notes').value;
   const row = {
-    child_name: child, entry_date: date, session, pool_size: parseInt(pool),
-    sets: JSON.stringify(sets), notes
+    child_name: child, entry_date: date, session,
+    pool_size: parseInt(pool),
+    series_type: type ? parseInt(type) : null,
+    series_kind_id: seriesKind ? parseInt(seriesKind) : null,
+    lactate_measured: lactate || null
   };
 
   try {
     if (editingWorkoutId) {
       const { error } = await _db.from('workout_logs').update(row).eq('id', editingWorkoutId);
-      if (error) { toast('Грешка при запис', true); console.log(error); return; }
-      toast('Тренировката е обновена');
+      if (error) { toast('Грешка при запис', true); return; }
+      toast('Обновено');
     } else {
       const { error } = await _db.from('workout_logs').insert(row);
-      if (error) { toast('Грешка при запис', true); console.log(error); return; }
-      toast('Тренировката е запазена');
+      if (error) { toast('Грешка при запис', true); return; }
+      toast('Запазено');
     }
     cancelWorkoutEdit();
     if (document.getElementById('wkm-child').value === child) loadWorkoutsList();
@@ -2107,11 +2414,9 @@ async function loadWorkoutsList() {
   const el = document.getElementById('workouts-list');
   if (!child) { el.innerHTML = ''; return; }
   el.innerHTML = '<div class="empty" style="padding:20px"><i class="ti ti-loader"></i><span>Зареждане…</span></div>';
-
   try {
     const { data, error } = await _db.from('workout_logs')
-      .select('*').eq('child_name', child)
-      .order('entry_date', {ascending:false});
+      .select('*').eq('child_name', child).order('entry_date', {ascending:false});
     if (error) throw error;
     if (!data || !data.length) {
       el.innerHTML = '<div class="empty" style="padding:20px"><i class="ti ti-mood-empty"></i><span>Няма записи</span></div>';
@@ -2125,69 +2430,51 @@ async function loadWorkoutsList() {
     } catch(e) {}
 
     const sessLabel = {morning:'Сутрин', afternoon:'Следобед'};
+    const seriesMap = {};
+    seriesNomList.forEach(s => { seriesMap[s.id] = s; });
 
     let html = `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r)">
-    <table class="all-table" style="min-width:700px">
+    <table class="all-table" style="min-width:500px">
       <thead><tr>
-        <th style="text-align:left;padding-left:12px;min-width:90px">Дата</th>
+        <th style="text-align:left;padding-left:12px;min-width:80px">Дата</th>
+        <th>Басейн</th>
         <th>Сесия</th>
-        <th>Сет</th>
-        <th>Повт.</th>
-        <th>Дист.</th>
-        <th>Режим</th>
-        <th>Почивка</th>
-        <th>Оч.лактат</th>
-        <th>Изм.лактат</th>
-        <th style="min-width:120px">Времена</th>
-        <th style="min-width:80px">Wellness</th>
+        <th>Тип</th>
+        <th style="min-width:120px">Вид серия</th>
+        <th>Лактат</th>
+        <th>Wellness</th>
         <th></th>
-      </tr></thead>
-      <tbody>`;
+      </tr></thead><tbody>`;
 
     data.forEach(r => {
       const date = new Date(r.entry_date).toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit',year:'2-digit'});
-      let sets = [];
-      try { sets = JSON.parse(r.sets || '[]'); } catch(e) {}
-      if (!sets.length) sets = [{n:1}];
-      const filledSets = sets.filter(s => s.reps || s.dist || s.mode || s.rest || s.lac_exp || s.lac_act || s.times);
-      if (!filledSets.length) filledSets.push(sets[0]); // показвай поне един ред
-
       const w = wellnessMap[r.entry_date+'|'+r.session];
       const wellnessDots = w ? WCRITERIA.map(k => {
         const v = w[k]; const cls = v===1?'w-dot-r':v===2?'w-dot-y':'w-dot-g';
         return `<span class="w-dot ${cls}" title="${WLABELS[k]}" style="width:10px;height:10px"></span>`;
       }).join('') : '<span style="font-size:9px;color:var(--text3)">—</span>';
+      const sKind = r.series_kind_id ? seriesMap[r.series_kind_id] : null;
+      const kindLabel = sKind ? sKind.name : (r.series_kind_id ? '–' : '—');
+      const kindSub = sKind ? `<div style="font-size:9px;color:var(--text3)">${[sKind.reps?sKind.reps+'×':'',sKind.dist||'',sKind.mode||''].filter(Boolean).join(' ')}</div>` : '';
 
-      const actions = `<div style="display:flex;gap:4px;justify-content:center">
-        <button class="w-icon-btn" style="width:28px;height:28px" onclick='editWorkout(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
-          <i class="ti ti-pencil" style="font-size:13px;color:var(--navy)"></i>
-        </button>
-        <button class="w-icon-btn danger" style="width:28px;height:28px" onclick="deleteWorkout(${r.id},'${child}')">
-          <i class="ti ti-trash" style="font-size:13px;color:#c0392b"></i>
-        </button>
-      </div>`;
-
-      filledSets.forEach((s, i) => {
-        const isFirst = i === 0;
-        const rowspan = filledSets.length;
-        html += `<tr style="border-bottom:1px solid var(--border)">
-          ${isFirst ? `<td style="font-weight:700;font-style:italic;color:var(--navy);padding-left:12px;vertical-align:top;padding-top:10px" rowspan="${rowspan}">${date}</td>
-          <td style="font-size:11px;color:var(--text3);vertical-align:top;padding-top:10px;text-align:center" rowspan="${rowspan}">${sessLabel[r.session]||''}<br><span style="font-size:10px">${r.pool_size}м</span></td>` : ''}
-          <td style="text-align:center;font-weight:700;color:var(--navy)">С${s.n||i+1}</td>
-          <td style="text-align:center">${s.reps||'—'}</td>
-          <td style="text-align:center">${s.dist ? s.dist+'м' : '—'}</td>
-          <td style="text-align:center;font-family:monospace;font-size:12px">${s.mode||'—'}</td>
-          <td style="text-align:center;font-size:12px">${s.rest||'—'}</td>
-          <td style="text-align:center;font-size:12px">${s.lac_exp||'—'}</td>
-          <td style="text-align:center;font-size:12px">${s.lac_act||'—'}</td>
-          <td style="font-size:11px;font-style:italic;color:var(--text2);max-width:140px">${s.times||'—'}</td>
-          ${isFirst ? `<td style="vertical-align:top;padding-top:8px;text-align:center" rowspan="${rowspan}"><div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap">${wellnessDots}</div>${r.notes?`<div style="font-size:9px;font-style:italic;color:var(--text3);margin-top:4px">${r.notes}</div>`:''}
-          </td>
-          <td style="vertical-align:top;padding-top:6px" rowspan="${rowspan}">${actions}</td>` : ''}
-        </tr>`;
-      });
+      html += `<tr style="border-bottom:1px solid var(--border)">
+        <td style="font-weight:700;font-style:italic;color:var(--navy);padding-left:12px">${date}</td>
+        <td style="text-align:center;font-size:12px">${r.pool_size}м</td>
+        <td style="text-align:center;font-size:12px">${sessLabel[r.session]||'—'}</td>
+        <td style="text-align:center;font-weight:700;color:var(--navy)">${r.series_type||'—'}</td>
+        <td style="font-size:12px;font-style:italic">${kindLabel}${kindSub}</td>
+        <td style="text-align:center;font-weight:700;color:var(--navy)">${r.lactate_measured||'—'}</td>
+        <td style="text-align:center"><div style="display:flex;gap:3px;justify-content:center">${wellnessDots}</div></td>
+        <td><div style="display:flex;gap:4px;justify-content:center">
+          <button class="w-icon-btn" style="width:28px;height:28px" onclick='editWorkout(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
+            <i class="ti ti-pencil" style="font-size:13px;color:var(--navy)"></i>
+          </button>
+          <button class="w-icon-btn danger" style="width:28px;height:28px" onclick="deleteWorkout(${r.id},'${child}')">
+            <i class="ti ti-trash" style="font-size:13px;color:#c0392b"></i>
+          </button>
+        </div></td>
+      </tr>`;
     });
-
     html += '</tbody></table></div>';
     el.innerHTML = html;
   } catch(e) { el.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i><span>Грешка</span></div>'; }
@@ -2197,23 +2484,18 @@ function editWorkout(r) {
   document.getElementById('wk-child').value = r.child_name;
   document.getElementById('wk-date').value = r.entry_date;
   document.getElementById('wk-pool').value = r.pool_size;
+  document.getElementById('wk-type').value = r.series_type || '';
+  document.getElementById('wk-series-kind').value = r.series_kind_id || '';
+  document.getElementById('wk-lactate').value = r.lactate_measured || '';
   document.querySelectorAll('.session-btn').forEach(b => {
     b.classList.toggle('sel', b.dataset.session === r.session);
   });
   currentWkSession = r.session;
-  let sets = [];
-  try { sets = JSON.parse(r.sets || '[]'); } catch(e) {}
-  renderSetCards(sets.length ? sets.map((s,i)=>({...s,n:s.n||i+1})) : null);
-  document.getElementById('wk-notes').value = r.notes || '';
-  // Reset toggles for sets not present
-  [1,2,3].forEach(n => {
-    const has = sets.find(s => s.n === n);
-    const btn = document.getElementById(`set-toggle-${n}`);
-    if (btn) btn.textContent = has ? 'Премахни' : '+ Добави сет';
-  });
   editingWorkoutId = r.id;
-  document.querySelector('#view-workouts .btn-main').innerHTML = '<i class="ti ti-check"></i>Обнови тренировка';
-  document.getElementById('wk-cancel-edit').style.display = 'block';
+  const btn = document.getElementById('wk-save-btn');
+  if (btn) btn.innerHTML = '<i class="ti ti-check"></i>Обнови';
+  const cancel = document.getElementById('wk-cancel-edit');
+  if (cancel) cancel.style.display = 'block';
   loadWkWellnessPreview();
   document.getElementById('view-workouts').scrollIntoView({behavior:'smooth', block:'start'});
 }
@@ -2222,9 +2504,111 @@ async function deleteWorkout(id, child) {
   try {
     const { error } = await _db.from('workout_logs').delete().eq('id', id);
     if (error) { toast('Грешка при изтриване', true); return; }
-    toast('Тренировката е изтрита');
+    toast('Изтрито');
     loadWorkoutsList();
   } catch(e) { toast('Грешка при изтриване', true); }
+}
+
+// ── LACTATE CHARTS ──
+let lactateChart = null;
+
+async function initLactate() {
+  await fetchChildrenFromDB();
+  ['lac-child'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— избери —</option>' +
+      childrenList.map(n => `<option${n===cur?' selected':''}>${n}</option>`).join('');
+  });
+  await loadSeriesNom();
+}
+
+async function loadLactateChart() {
+  const child = document.getElementById('lac-child').value;
+  const type = document.getElementById('lac-type').value;
+  const pool = document.getElementById('lac-pool').value;
+  const chartEl = document.getElementById('lactate-chart-wrap');
+  const infoEl = document.getElementById('lactate-series-info');
+  if (!child || !type) { chartEl.innerHTML=''; infoEl.innerHTML=''; return; }
+
+  chartEl.innerHTML = '<div class="empty" style="padding:24px"><i class="ti ti-loader"></i><span>Зареждане…</span></div>';
+  infoEl.innerHTML = '';
+
+  try {
+    let q = _db.from('workout_logs').select('*')
+      .eq('child_name', child)
+      .eq('series_type', parseInt(type))
+      .not('lactate_measured', 'is', null)
+      .order('entry_date');
+    if (pool) q = q.eq('pool_size', parseInt(pool));
+    const { data, error } = await q;
+    if (error) throw error;
+
+    if (!data || !data.length) {
+      chartEl.innerHTML = '<div class="empty"><i class="ti ti-mood-empty"></i><span>Няма данни за лактат за този тип</span></div>';
+      return;
+    }
+
+    const labels = data.map(r => new Date(r.entry_date).toLocaleDateString('bg-BG',{day:'2-digit',month:'2-digit',year:'2-digit'}) + (r.pool_size?' '+r.pool_size+'м':''));
+    const values = data.map(r => parseFloat(r.lactate_measured) || null);
+
+    if (lactateChart) lactateChart.destroy();
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'max-height:260px;width:100%';
+    chartEl.innerHTML = '';
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.padding = '14px';
+    card.appendChild(canvas);
+    chartEl.appendChild(card);
+
+    lactateChart = new Chart(canvas, {
+      type: 'line',
+      data: { labels, datasets: [{
+        label: 'Лактат',
+        data: values,
+        borderColor: '#c0392b',
+        backgroundColor: 'rgba(192,57,43,0.08)',
+        pointBackgroundColor: '#c0392b',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        tension: .3, fill: true, borderWidth: 2
+      }]},
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: { label: c => 'Лактат: ' + c.raw + ' mmol/L' },
+            backgroundColor: 'rgba(13,43,82,0.9)', borderColor: 'rgba(13,43,82,0.15)', borderWidth: 1,
+            titleFont: {family:'Cambria',size:11}, bodyFont: {family:'Cambria',size:13}
+          }
+        },
+        scales: {
+          y: { min: 0, title: { display: true, text: 'mmol/L', font:{family:'Cambria',size:11}, color:'var(--text3)' },
+            grid: {color:'rgba(0,0,0,0.04)'},
+            ticks: { font:{size:11,family:'Cambria'}, color:'var(--text2)' } },
+          x: { grid: {color:'rgba(0,0,0,0.04)'}, ticks: { font:{size:10,family:'Cambria'}, color:'var(--text2)' } }
+        }
+      }
+    });
+
+    // Series info below chart
+    const seriesMap = {}; seriesNomList.forEach(s => { seriesMap[s.id]=s; });
+    const kinds = [...new Set(data.filter(r=>r.series_kind_id).map(r=>r.series_kind_id))];
+    if (kinds.length) {
+      infoEl.innerHTML = kinds.map(kid => {
+        const s = seriesMap[kid];
+        if (!s) return '';
+        return `<div class="card" style="padding:10px 14px;margin-top:8px">
+          <div style="font-size:13px;font-weight:700;font-style:italic;color:var(--navy)">Тип ${s.type} · ${s.name}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">${[s.reps?s.reps+'×':'',s.dist||'',s.mode||'',s.rest?'почивка '+s.rest:''].filter(Boolean).join(' · ')}</div>
+        </div>`;
+      }).join('');
+    }
+  } catch(e) { chartEl.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i><span>Грешка</span></div>'; }
 }
 
 </script>
